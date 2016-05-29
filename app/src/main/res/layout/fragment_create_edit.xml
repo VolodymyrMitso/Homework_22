@@ -19,7 +19,7 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/et_create_note"
+            android:id="@+id/et_create_edit_note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/v_line_bottom"
@@ -46,8 +46,10 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_marginBottom="@dimen/d_size_12dp"
+                android:layout_marginLeft="@dimen/d_size_30dp"
                 android:layout_marginStart="@dimen/d_size_30dp"
                 android:layout_marginTop="@dimen/d_size_12dp"
                 android:background="@color/c_bottom_bar"
@@ -59,8 +61,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_marginBottom="@dimen/d_size_12dp"
                 android:layout_marginEnd="@dimen/d_size_30dp"
+                android:layout_marginRight="@dimen/d_size_30dp"
                 android:layout_marginTop="@dimen/d_size_12dp"
                 android:background="@color/c_bottom_bar"
                 android:src="@drawable/ic_save"

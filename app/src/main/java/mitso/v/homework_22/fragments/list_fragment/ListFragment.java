@@ -21,7 +21,7 @@ import mitso.v.homework_22.database.GetDataTask;
 import mitso.v.homework_22.database.SetDataTask;
 import mitso.v.homework_22.databinding.FragmentListBinding;
 import mitso.v.homework_22.fragments.BaseFragment;
-import mitso.v.homework_22.fragments.create_fragment.CreateFragment;
+import mitso.v.homework_22.fragments.create_fragment.CreateEditFragment;
 import mitso.v.homework_22.fragments.list_fragment.recycler_view.INoteHandler;
 import mitso.v.homework_22.fragments.list_fragment.recycler_view.NoteAdapter;
 import mitso.v.homework_22.fragments.list_fragment.recycler_view.SpacingDecoration;
@@ -37,6 +37,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private List<Note>              mNoteList;
 
     private Note                    mNote;
+    private Note                    mOldNote;
 
     private DatabaseHelper          mDatabaseHelper;
 
@@ -67,6 +68,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             if (!mNoteList.isEmpty()) {
                 Log.i(LOG_TAG, "LIST ISN'T EMPTY.");
 
+                deleteOldNote();
                 initRecyclerView();
                 setDatabaseData();
 
@@ -104,6 +106,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 if (!mNoteList.isEmpty()) {
                     Log.i(LOG_TAG, "LIST ISN'T EMPTY.");
 
+                    deleteOldNote();
                     initRecyclerView();
                     setDatabaseData();
 
@@ -170,7 +173,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                 mMainActivity.getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fl_container, new CreateFragment())
+                        .replace(R.id.fl_container, new CreateEditFragment())
                         .commitAllowingStateLoss();
             }
         });
@@ -179,8 +182,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private void addNote() {
 
         try {
-            mNote = (Note) getArguments().getSerializable(Constants.NOTE_BUNDLE_KEY);
-            mNoteList.add(mNote);
+            mNote = (Note) getArguments().getSerializable(Constants.NOTE_BUNDLE_OUT_KEY);
+            mNoteList.add(0, mNote);
 
             Log.i(LOG_TAG, "NOTE IS ADDED.");
 
@@ -188,6 +191,22 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
             Log.e(LOG_TAG, _error.toString());
             Log.i(LOG_TAG, "NOTE IS NULL.");
+        }
+    }
+
+    private void deleteOldNote() {
+
+        try {
+            mOldNote = (Note) getArguments().getSerializable(Constants.OLD_NOTE_BUNDLE_KEY);
+            if (mNoteList.contains(mOldNote))
+                mNoteList.remove(mOldNote);
+
+            Log.i(LOG_TAG, "OLD NOTE IS DELETED.");
+
+        } catch (NullPointerException _error) {
+
+            Log.e(LOG_TAG, _error.toString());
+            Log.i(LOG_TAG, "OLD NOTE IS NULL.");
         }
     }
 
@@ -207,7 +226,17 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     @Override
     public void openNote(Note _note) {
 
-        Toast.makeText(mMainActivity, _note.getBody(), Toast.LENGTH_SHORT).show();
+        final CreateEditFragment createEditFragment = new CreateEditFragment();
+        final Bundle bundle = new Bundle();
+        bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
+        createEditFragment.setArguments(bundle);
+
+        Toast.makeText(mMainActivity, String.valueOf(_note.getId()), Toast.LENGTH_SHORT).show();
+
+        mMainActivity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fl_container, createEditFragment)
+                .commitAllowingStateLoss();
     }
 
     @Override

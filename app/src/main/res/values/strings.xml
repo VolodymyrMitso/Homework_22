@@ -1,6 +1,6 @@
 <resources>
     <string name="s_app_name">NOTEs</string>
-    <string name="menu_done">ddd</string>
-    <string name="menu_cancel">ccc</string>
+
     <string name="s_create_note">create note</string>
+    <string name="s_edit_note">edit note</string>
 </resources>
