@@ -200,11 +200,53 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         mBinding.rvNotes.addItemDecoration(new SpacingDecoration(spacingInPixels));
 
         Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
+
+        setHandler();
     }
 
     @Override
     public void openNote(Note _note) {
 
-        Toast.makeText(mMainActivity, _note.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(mMainActivity, _note.getBody(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        setHandler();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        releaseHandler();
+    }
+
+    private void setHandler() {
+
+        try {
+            if (!isHandlerSet) {
+                mNoteAdapter.setNoteHandler(this);
+                isHandlerSet = true;
+                Log.i(LOG_TAG, "HANDLER IS SET ON.");
+            }
+        } catch (Exception _error) {
+            Log.e(LOG_TAG, _error.toString());
+        }
+    }
+
+    private void releaseHandler() {
+
+        try {
+            if (isHandlerSet) {
+                mNoteAdapter.releaseNoteHandler();
+                isHandlerSet = false;
+                Log.i(LOG_TAG, "HANDLER IS SET OFF.");
+            }
+        } catch (Exception _error) {
+            Log.e(LOG_TAG, _error.toString());
+        }
     }
 }

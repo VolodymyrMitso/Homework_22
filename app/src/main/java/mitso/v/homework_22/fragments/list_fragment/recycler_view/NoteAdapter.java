@@ -50,7 +50,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteViewHolder> {
         this.mNoteHandler = _noteHandler;
     }
 
-    public void releaseBankHandler() {
+    public void releaseNoteHandler() {
         this.mNoteHandler = null;
     }
 }
