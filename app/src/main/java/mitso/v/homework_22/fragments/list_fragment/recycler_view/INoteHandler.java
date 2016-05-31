@@ -5,4 +5,6 @@ import mitso.v.homework_22.models.Note;
 public interface INoteHandler {
 
     void openNote(Note _note);
+
+    void selectNote(Note _note);
 }

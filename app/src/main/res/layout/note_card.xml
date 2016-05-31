@@ -12,6 +12,10 @@
         <variable
             name="clickerOpenNote"
             type="android.view.View.OnClickListener" />
+
+        <variable
+            name="clickerSelectNote"
+            type="android.view.View.OnLongClickListener" />
     </data>
 
     <LinearLayout
@@ -20,7 +24,8 @@
         android:background="@drawable/shape_card"
         android:orientation="vertical"
         android:padding="10dp"
-        app:onClickListener="@{clickerOpenNote}">
+        app:onClickListener="@{clickerOpenNote}"
+        app:onLongClickListener="@{clickerSelectNote}">
 
         <TextView
             android:layout_width="match_parent"

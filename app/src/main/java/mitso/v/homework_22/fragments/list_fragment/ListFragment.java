@@ -240,6 +240,12 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     }
 
     @Override
+    public void selectNote(Note _note) {
+
+        Toast.makeText(mMainActivity, _note.toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 

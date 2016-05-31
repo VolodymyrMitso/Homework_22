@@ -27,7 +27,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(NoteViewHolder _holder, int _position) {
+    public void onBindViewHolder(final NoteViewHolder _holder, final int _position) {
 
         final Note note = mNoteList.get(_position);
 
@@ -37,6 +37,16 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteViewHolder> {
             @Override
             public void onClick(View v) {
                 mNoteHandler.openNote(note);
+            }
+        });
+
+        _holder.getBinding().setClickerSelectNote(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                mNoteHandler.selectNote(note);
+
+                return true;
             }
         });
     }
