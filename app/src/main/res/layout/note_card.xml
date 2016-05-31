@@ -19,47 +19,55 @@
     </data>
 
     <LinearLayout
+        android:id="@+id/card_note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_card"
-        android:orientation="vertical"
-        android:padding="10dp"
-        app:onClickListener="@{clickerOpenNote}"
-        app:onLongClickListener="@{clickerSelectNote}">
+        android:padding="5dp"
+        android:background="@color/c_card_unselected_shape">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{note.body}"
-            android:textColor="@color/c_card_text"
-            android:textSize="@dimen/d_text_14sp"
-            tools:text="note body" />
+            android:background="@drawable/shape_card"
+            android:orientation="vertical"
+            android:padding="5dp"
+            app:onClickListener="@{clickerOpenNote}"
+            app:onLongClickListener="@{clickerSelectNote}">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/d_size_1dp"
-            android:layout_marginBottom="@dimen/d_size_10dp"
-            android:layout_marginTop="@dimen/d_size_10dp"
-            android:background="@color/c_card_shape" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{note.body}"
+                android:textColor="@color/c_card_text"
+                android:textSize="@dimen/d_text_14sp"
+                tools:text="note body" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:text="@{note.formattedTime}"
-            android:textColor="@color/c_card_text"
-            android:textSize="@dimen/d_text_12sp"
-            tools:text="note date" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/d_size_1dp"
+                android:layout_marginBottom="@dimen/d_size_10dp"
+                android:layout_marginTop="@dimen/d_size_10dp"
+                android:background="@color/c_card" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:text="@{note.formattedDate}"
-            android:textColor="@color/c_card_text"
-            android:textSize="@dimen/d_text_12sp"
-            tools:text="note date" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@{note.formattedTime}"
+                android:textColor="@color/c_card_text"
+                android:textSize="@dimen/d_text_12sp"
+                tools:text="note date" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@{note.formattedDate}"
+                android:textColor="@color/c_card_text"
+                android:textSize="@dimen/d_text_12sp"
+                tools:text="note date" />
+
+        </LinearLayout>
     </LinearLayout>
 
 </layout>

@@ -2,13 +2,13 @@ package mitso.v.homework_22.constants;
 
 public class Constants {
 
-    public static final String GET_DATA_TASK_LOG_TAG = "GET_DATA_TASK_LOG_TAG";
-    public static final String SET_DATA_TASK_LOG_TAG = "SET_DATA_TASK_LOG_TAG";
+    public static final String GET_DATA_TASK_LOG_TAG = "_____GET_DATA_TASK_LOG_TAG";
+    public static final String SET_DATA_TASK_LOG_TAG = "_____SET_DATA_TASK_LOG_TAG";
 
     /////////////////////////////////////////////////////////////////////////////////////
 
-    public static final String LIST_FRAGMENT_LOG_TAG        = "LIST_FRAGMENT_LOG_TAG";
-    public static final String CREATE_EDIT_FRAGMENT_LOG_TAG = "CREATE_EDIT_FRAGMENT_LOG_TAG";
+    public static final String LIST_FRAGMENT_LOG_TAG        = "_____LIST_FRAGMENT_LOG_TAG";
+    public static final String CREATE_EDIT_FRAGMENT_LOG_TAG = "_____CREATE_EDIT_FRAGMENT_LOG_TAG";
 
     /////////////////////////////////////////////////////////////////////////////////////
 

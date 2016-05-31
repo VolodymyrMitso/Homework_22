@@ -3,13 +3,15 @@ package mitso.v.homework_22.fragments.list_fragment;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -171,6 +173,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onClick(View v) {
 
+                if (mActionMode != null)
+                    mActionMode.finish();
+
                 mMainActivity.getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fl_container, new CreateEditFragment())
@@ -212,10 +217,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void initRecyclerView() {
 
-        mNoteAdapter = new NoteAdapter(mNoteList);
+        mNoteAdapter = new NoteAdapter(mMainActivity, mNoteList);
+        final int spacingInPixels = mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_10dp);
+
         mBinding.rvNotes.setAdapter(mNoteAdapter);
         mBinding.rvNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        final int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.d_size_10dp);
         mBinding.rvNotes.addItemDecoration(new SpacingDecoration(spacingInPixels));
 
         Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
@@ -223,27 +229,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         setHandler();
     }
 
-    @Override
-    public void openNote(Note _note) {
-
-        final CreateEditFragment createEditFragment = new CreateEditFragment();
-        final Bundle bundle = new Bundle();
-        bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
-        createEditFragment.setArguments(bundle);
-
-        Toast.makeText(mMainActivity, String.valueOf(_note.getId()), Toast.LENGTH_SHORT).show();
-
-        mMainActivity.getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fl_container, createEditFragment)
-                .commitAllowingStateLoss();
-    }
-
-    @Override
-    public void selectNote(Note _note) {
-
-        Toast.makeText(mMainActivity, _note.toString(), Toast.LENGTH_SHORT).show();
-    }
+//    @Override
+//    public void onClick(Note _note) {
+//
+//
+//    }
 
     @Override
     public void onResume() {
@@ -283,5 +273,92 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         } catch (Exception _error) {
             Log.e(LOG_TAG, _error.toString());
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////
+
+    private ActionMode              mActionMode;
+    private ActionMode.Callback     mActionModeCallBack;
+
+    @Override
+    public void onClick(Note _note, int _position) { // click
+
+        if (mActionMode != null)
+
+            toggleSelection(_position);
+
+        else {
+
+            final CreateEditFragment createEditFragment = new CreateEditFragment();
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
+            createEditFragment.setArguments(bundle);
+
+            mMainActivity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fl_container, createEditFragment)
+                    .commitAllowingStateLoss();
+        }
+    }
+
+    @Override
+    public void onLongClick(Note _note, int _position) { // long click
+
+        if (mActionMode == null)
+            initActionMode();
+
+        toggleSelection(_position);
+    }
+
+    private void toggleSelection(int _position) {
+
+        mNoteAdapter.toggleSelection(_position);
+        int count = mNoteAdapter.getSelectedItemCount();
+
+        if (count == 0)
+            mActionMode.finish();
+        else {
+            mActionMode.setTitle(String.valueOf(count));
+            mActionMode.invalidate();
+        }
+    }
+
+    private void initActionMode() {
+
+        mActionModeCallBack = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_selected, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.mi_remove:
+                        mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
+                        /** !!! */
+                        mNoteList = mNoteAdapter.getNoteList();
+                        setDatabaseData();
+                        mode.finish();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                mNoteAdapter.clearSelection();
+                mActionMode = null;
+            }
+        };
+
+        mActionMode = mMainActivity.startSupportActionMode(mActionModeCallBack);
     }
 }

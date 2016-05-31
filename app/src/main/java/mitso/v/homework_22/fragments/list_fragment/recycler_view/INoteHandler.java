@@ -4,7 +4,7 @@ import mitso.v.homework_22.models.Note;
 
 public interface INoteHandler {
 
-    void openNote(Note _note);
+    void onClick(Note _note, int _position);
 
-    void selectNote(Note _note);
+    void onLongClick(Note _note, int _position);
 }
