@@ -3,13 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/mi_share_sm"
+        android:id="@+id/mi_share_cem"
         android:icon="@drawable/ic_share"
-        android:title="@string/s_share_notes"
-        app:showAsAction="always"/>
-    <item
-        android:id="@+id/mi_remove_sm"
-        android:icon="@drawable/ic_delete"
-        android:title="@string/s_delete_notes"
+        android:title="@string/s_share_note"
         app:showAsAction="always"/>
 </menu>

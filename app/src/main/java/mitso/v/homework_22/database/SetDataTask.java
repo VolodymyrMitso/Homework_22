@@ -43,41 +43,46 @@ public class SetDataTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... _voids) {
+    protected Void doInBackground(Void ... _voids) {
 
         try {
             if (mContext.getDatabasePath(DatabaseHelper.DATABASE_NAME).exists()) {
 
-                SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+                mContext.deleteDatabase(DatabaseHelper.DATABASE_NAME);
 
-                db.execSQL("delete from " + DatabaseHelper.DATABASE_TABLE);
+                Log.i(LOG_TAG, "DATABASE IS DELETED.");
 
-                for (int i = 0; i < mNoteList.size(); i++) {
+                if (!mNoteList.isEmpty()) {
 
-                    Note note = mNoteList.get(i);
-                    String apiBankString = new Gson().toJson(note);
+                    final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
 
-                    ContentValues values = new ContentValues();
-                    values.put(DatabaseHelper.COLUMN_NOTES, apiBankString);
+                    for (int i = 0; i < mNoteList.size(); i++) {
 
-                    db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
+                        final Note note = mNoteList.get(i);
+                        final String noteString = new Gson().toJson(note);
+
+                        final ContentValues values = new ContentValues();
+                        values.put(DatabaseHelper.COLUMN_NOTES, noteString);
+
+                        db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
+                    }
+
+                    db.close();
+
+                    Log.i(LOG_TAG, "DATABASE IS REWRITTEN.");
                 }
-
-                db.close();
-
-                Log.i(LOG_TAG, "DATABASE IS REWRITTEN.");
 
             } else {
 
-                SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+                final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
 
                 for (int i = 0; i < mNoteList.size(); i++) {
 
-                    Note note = mNoteList.get(i);
-                    String apiBankString = new Gson().toJson(note);
+                    final Note note = mNoteList.get(i);
+                    final String noteString = new Gson().toJson(note);
 
-                    ContentValues values = new ContentValues();
-                    values.put(DatabaseHelper.COLUMN_NOTES, apiBankString);
+                    final ContentValues values = new ContentValues();
+                    values.put(DatabaseHelper.COLUMN_NOTES, noteString);
 
                     db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
                 }
@@ -87,9 +92,9 @@ public class SetDataTask extends AsyncTask<Void, Void, Void> {
                 Log.i(LOG_TAG, "DATABASE IS CREATED FIRST TIME.");
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            mException = e;
+        } catch (Exception _error) {
+            _error.printStackTrace();
+            mException = _error;
         }
 
         return null;

@@ -7,11 +7,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/d_size_1dp"
-            android:background="@color/c_action_bar_line" />
-
         <FrameLayout
             android:id="@+id/fl_container"
             android:layout_width="match_parent"

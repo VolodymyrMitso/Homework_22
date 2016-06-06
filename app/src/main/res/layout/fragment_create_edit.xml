@@ -5,10 +5,6 @@
 
     <data>
         <variable
-            name="clickerBack"
-            type="android.view.View.OnClickListener" />
-
-        <variable
             name="clickerSave"
             type="android.view.View.OnClickListener" />
     </data>
@@ -22,19 +18,13 @@
             android:id="@+id/et_create_edit_note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/v_line_bottom"
+            android:layout_above="@+id/ll_bottom_bar"
             android:layout_alignParentTop="true"
             android:background="@null"
             android:gravity="start"
             android:padding="@dimen/d_size_10dp"
             android:textColor="@color/c_create_text" />
 
-        <View
-            android:id="@+id/v_line_bottom"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/d_size_1dp"
-            android:layout_above="@+id/ll_bottom_bar"
-            android:background="@color/c_bottom_bar_line" />
 
         <RelativeLayout
             android:id="@+id/ll_bottom_bar"
@@ -42,20 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="@color/c_bottom_bar">
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="@dimen/d_size_12dp"
-                android:layout_marginLeft="@dimen/d_size_30dp"
-                android:layout_marginStart="@dimen/d_size_30dp"
-                android:layout_marginTop="@dimen/d_size_12dp"
-                android:background="@color/c_bottom_bar"
-                android:src="@drawable/ic_back"
-                app:onClickListener="@{clickerBack}" />
-
 
             <ImageButton
                 android:layout_width="wrap_content"

@@ -3,5 +3,11 @@
 
     <string name="s_create_note">Create note</string>
     <string name="s_edit_note">Edit note</string>
-    <string name="s_delete_note">Delete note(s)</string>
+
+    <string name="s_delete_notes">Delete note(s)</string>
+    <string name="s_share_notes">Share note(s)</string>
+
+    <string name="s_share_note">Share note</string>
+
+    <string name="s_no_program">You do not have right program for this action.</string>
 </resources>

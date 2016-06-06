@@ -1,15 +1,21 @@
 package mitso.v.homework_22.fragments.create_fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Html;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import java.util.Date;
 
@@ -36,8 +42,11 @@ public class CreateEditFragment extends BaseFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_create_edit, container, false);
         final View rootView = mBinding.getRoot();
 
-        addNote();
+        onBackPressed(rootView);
 
+        getNote();
+
+        setHasOptionsMenu(true);
         initActionBar();
 
         initButtons();
@@ -45,9 +54,36 @@ public class CreateEditFragment extends BaseFragment {
         return rootView;
     }
 
+    private void onBackPressed(View _rootView) {
+
+        _rootView.setFocusableInTouchMode(true);
+        _rootView.requestFocus();
+        _rootView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                    Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
+                    Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL");
+
+                    hideKeyboard();
+
+                    mMainActivity.commitFragment(new ListFragment());
+
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
     private void initActionBar() {
 
         if (mMainActivity.getSupportActionBar() != null) {
+
+            mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            mMainActivity.getSupportActionBar().setHomeButtonEnabled(true);
+            mMainActivity.getSupportActionBar().setDisplayShowHomeEnabled(true);
 
             if (isNoteNotNull)
                 mMainActivity.getSupportActionBar().setTitle(Html.fromHtml("<font color='#" +
@@ -60,20 +96,48 @@ public class CreateEditFragment extends BaseFragment {
         }
     }
 
-    private void initButtons() {
+    @Override
+    public void onCreateOptionsMenu(Menu _menu, MenuInflater _inflater) {
+        _inflater.inflate(R.menu.menu_create_edit, _menu);
+        super.onCreateOptionsMenu(_menu, _inflater);
+    }
 
-        mBinding.setClickerBack(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem _item) {
+
+        switch (_item.getItemId()) {
+            case android.R.id.home:
+
+                Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
+                Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL");
 
                 hideKeyboard();
 
-                mMainActivity.getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fl_container, new ListFragment())
-                        .commitAllowingStateLoss();
-            }
-        });
+                mMainActivity.commitFragment(new ListFragment());
+
+                return true;
+            case R.id.mi_share_cem:
+
+                if (!mBinding.etCreateEditNote.getText().toString().isEmpty()) {
+
+                    final Intent shareNoteIntent = new Intent(android.content.Intent.ACTION_SEND);
+                    shareNoteIntent.setType("text/plain");
+                    shareNoteIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, mMainActivity.getResources().getString(R.string.s_share_note));
+                    shareNoteIntent.putExtra(android.content.Intent.EXTRA_TEXT, mBinding.etCreateEditNote.getText().toString());
+
+                    if (shareNoteIntent.resolveActivity(mMainActivity.getPackageManager()) != null)
+                        startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_note)));
+                    else
+                        Toast.makeText(mMainActivity, "you do not have the right program for this action", Toast.LENGTH_SHORT).show();
+                }
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(_item);
+        }
+    }
+
+    private void initButtons() {
 
         mBinding.setClickerSave(new View.OnClickListener() {
             @Override
@@ -92,17 +156,16 @@ public class CreateEditFragment extends BaseFragment {
                     if (isNoteNotNull) {
                         bundle.putSerializable(Constants.OLD_NOTE_BUNDLE_KEY, mNote);
                         Log.i(LOG_TAG, "OLD NOTE IS SENT.");
-                    }
+                    } else
+                        Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
                     listFragment.setArguments(bundle);
-                }
+                } else
+                    Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
 
                 hideKeyboard();
 
-                mMainActivity.getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fl_container, listFragment)
-                        .commitAllowingStateLoss();
+                mMainActivity.commitFragment(listFragment);
             }
         });
     }
@@ -117,13 +180,14 @@ public class CreateEditFragment extends BaseFragment {
         }
     }
 
-    private void addNote() {
+    private void getNote() {
 
         try {
             mNote = (Note) getArguments().getSerializable(Constants.NOTE_BUNDLE_IN_KEY);
-            if (mNote != null)
-                mBinding.etCreateEditNote.setText(mNote.getBody());
+            if (mNote == null)
+                throw new NullPointerException();
 
+            mBinding.etCreateEditNote.setText(mNote.getBody());
             isNoteNotNull = true;
             Log.i(LOG_TAG, "NOTE IS RECEIVED.");
 
@@ -131,7 +195,7 @@ public class CreateEditFragment extends BaseFragment {
 
             isNoteNotNull = false;
             Log.e(LOG_TAG, _error.toString());
-            Log.i(LOG_TAG, "NOTE IS NULL.");
+            Log.i(LOG_TAG, "NOTE IS NOT RECEIVED. NOTE IS NULL.");
         }
     }
 }

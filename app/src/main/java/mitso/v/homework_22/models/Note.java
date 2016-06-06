@@ -9,7 +9,6 @@ public class Note implements Serializable {
     private String      mBody;
     private Date        mDate;
     private long        mId;
-    private boolean     isSelected;
     private String      mFormattedDate;
     private String      mFormattedTime;
 
@@ -43,10 +42,6 @@ public class Note implements Serializable {
                 ", mDate=" + mDate +
                 ", mBody='" + mBody + '\'' +
                 '}';
-    }
-
-    public boolean isSelected() {
-        return isSelected;
     }
 
     public String getBody() {

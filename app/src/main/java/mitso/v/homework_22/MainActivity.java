@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import mitso.v.homework_22.databinding.ActivityMainBinding;
+import mitso.v.homework_22.fragments.BaseFragment;
 import mitso.v.homework_22.fragments.list_fragment.ListFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -20,9 +21,14 @@ public class MainActivity extends AppCompatActivity {
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+        commitFragment(new ListFragment());
+    }
+
+    public void commitFragment(BaseFragment _baseFragment) {
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fl_container, new ListFragment())
+                .replace(R.id.fl_container, _baseFragment)
                 .commitAllowingStateLoss();
     }
 }

@@ -2,18 +2,16 @@
 <resources>
     <color name="c_status_bar">#607D8B</color>
 
-    <color name="c_action_bar">#CFD8DC</color>
-    <color name="c_action_bar_line">#607D8B</color>
-    <color name="c_action_bar_text">#2196F3</color>
+    <color name="c_action_bar">#90A4AE</color>
+    <color name="c_action_bar_text">#ffffff</color>
 
     <color name="c_bottom_bar">#CFD8DC</color>
-    <color name="c_bottom_bar_line">#607D8B</color>
 
     <color name="c_accent">#607D8B</color>
     <color name="c_create_text">#607D8B</color>
 
-    <color name="c_card">#607D8B</color>
-    <color name="c_card_selected_shape">#2196F3</color>
-    <color name="c_card_unselected_shape">#00000000</color>
+    <color name="c_card_selected">#2196F3</color>
+    <color name="c_card_default">#CFD8DC</color>
+
     <color name="c_card_text">#000000</color>
 </resources>

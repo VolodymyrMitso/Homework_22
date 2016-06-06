@@ -2,6 +2,7 @@ package mitso.v.homework_22.fragments.list_fragment.recycler_view;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,13 @@ import java.util.Comparator;
 import java.util.List;
 
 import mitso.v.homework_22.R;
+import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.databinding.NoteCardBinding;
 import mitso.v.homework_22.models.Note;
 
 public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
+
+    private String          LOG_TAG = Constants.NOTE_ADAPTER_LOG_TAG;
 
     private List<Note>      mNoteList;
     private INoteHandler    mNoteHandler;
@@ -60,8 +64,8 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
 
         /** highlight selected item: */
         final Drawable selectedShape = mContext.getResources().getDrawable(R.drawable.shape_card_selected);
-        final Drawable unselectedShape = mContext.getResources().getDrawable(R.drawable.shape_card_unselected);
-        _holder.getBinding().cardNote.setBackgroundDrawable(isSelected(_position) ? selectedShape : unselectedShape);
+        final Drawable defaultShape = mContext.getResources().getDrawable(R.drawable.shape_card_default);
+        _holder.getBinding().cardNote.setBackgroundDrawable(isSelected(_position) ? selectedShape : defaultShape);
     }
 
     public void removeNotes(List<Integer> _positions) {
@@ -116,11 +120,17 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
     }
 
     public void setNoteHandler(INoteHandler _noteHandler) {
-        this.mNoteHandler = _noteHandler;
+        if (mNoteHandler == null) {
+            this.mNoteHandler = _noteHandler;
+            Log.i(LOG_TAG, "HANDLER IS SET.");
+        }
     }
 
     public void releaseNoteHandler() {
-        this.mNoteHandler = null;
+        if (mNoteHandler != null) {
+            this.mNoteHandler = null;
+            Log.i(LOG_TAG, "HANDLER IS NULL.");
+        }
     }
 
     /** !!! */

@@ -6,23 +6,22 @@ import android.view.View;
 
 public class SpacingDecoration extends RecyclerView.ItemDecoration {
 
-    private int     mHalfSpace;
+    private int     mSpace;
 
     public SpacingDecoration(int _space) {
-        this.mHalfSpace = _space / 2;
+        this.mSpace = _space;
     }
 
     @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+    public void getItemOffsets(Rect _outRect, View _view, RecyclerView _parent, RecyclerView.State _state) {
 
-        if (parent.getPaddingLeft() != mHalfSpace) {
-            parent.setPadding(mHalfSpace, mHalfSpace, mHalfSpace, mHalfSpace);
-            parent.setClipToPadding(false);
-        }
+        _outRect.left = mSpace;
+        _outRect.right = mSpace;
+        _outRect.bottom = mSpace;
 
-        outRect.top = mHalfSpace;
-        outRect.bottom = mHalfSpace;
-        outRect.left = mHalfSpace;
-        outRect.right = mHalfSpace;
+        if (_parent.getChildLayoutPosition(_view) == 0)
+            _outRect.top = mSpace;
+        else
+            _outRect.top = 0;
     }
 }
