@@ -1,52 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <data>
-        <variable
-            name="clickerSave"
-            type="android.view.View.OnClickListener" />
-    </data>
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:padding="@dimen/d_size_10dp">
 
         <EditText
             android:id="@+id/et_create_edit_note"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/ll_bottom_bar"
-            android:layout_alignParentTop="true"
+            android:layout_height="match_parent"
             android:background="@null"
             android:gravity="start"
-            android:padding="@dimen/d_size_10dp"
-            android:textColor="@color/c_create_text" />
-
-
-        <RelativeLayout
-            android:id="@+id/ll_bottom_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@color/c_bottom_bar">
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_marginBottom="@dimen/d_size_12dp"
-                android:layout_marginEnd="@dimen/d_size_30dp"
-                android:layout_marginRight="@dimen/d_size_30dp"
-                android:layout_marginTop="@dimen/d_size_12dp"
-                android:background="@color/c_bottom_bar"
-                android:src="@drawable/ic_save"
-                app:onClickListener="@{clickerSave}" />
-
-        </RelativeLayout>
+            android:textColor="@color/c_create_edit_text" />
 
     </RelativeLayout>
 

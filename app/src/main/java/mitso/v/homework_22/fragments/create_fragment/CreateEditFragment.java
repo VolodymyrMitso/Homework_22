@@ -42,39 +42,52 @@ public class CreateEditFragment extends BaseFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_create_edit, container, false);
         final View rootView = mBinding.getRoot();
 
-        onBackPressed(rootView);
-
         getNote();
 
         setHasOptionsMenu(true);
         initActionBar();
 
-        initButtons();
-
         return rootView;
     }
 
-    private void onBackPressed(View _rootView) {
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        _rootView.setFocusableInTouchMode(true);
-        _rootView.requestFocus();
-        _rootView.setOnKeyListener(new View.OnKeyListener() {
+         initBackButton();
+    }
+
+    private void initBackButton() {
+
+        mBinding.etCreateEditNote.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (keyCode == KeyEvent.KEYCODE_BACK)
+                    mBinding.etCreateEditNote.clearFocus();
 
-                    Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
-                    Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL");
-
-                    hideKeyboard();
-
-                    mMainActivity.commitFragment(new ListFragment());
-
-                    return true;
-                }
                 return false;
             }
         });
+
+        if (getView() != null) {
+            getView().setFocusableInTouchMode(true);
+            getView().requestFocus();
+            getView().setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
+
+                        Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
+                        Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL");
+
+                        mMainActivity.commitFragment(new ListFragment());
+
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     private void initActionBar() {
@@ -116,7 +129,7 @@ public class CreateEditFragment extends BaseFragment {
                 mMainActivity.commitFragment(new ListFragment());
 
                 return true;
-            case R.id.mi_share_cem:
+            case R.id.mi_share:
 
                 if (!mBinding.etCreateEditNote.getText().toString().isEmpty()) {
 
@@ -128,20 +141,11 @@ public class CreateEditFragment extends BaseFragment {
                     if (shareNoteIntent.resolveActivity(mMainActivity.getPackageManager()) != null)
                         startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_note)));
                     else
-                        Toast.makeText(mMainActivity, "you do not have the right program for this action", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
                 }
 
                 return true;
-            default:
-                return super.onOptionsItemSelected(_item);
-        }
-    }
-
-    private void initButtons() {
-
-        mBinding.setClickerSave(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            case R.id.mi_save:
 
                 final ListFragment listFragment = new ListFragment();
 
@@ -166,8 +170,11 @@ public class CreateEditFragment extends BaseFragment {
                 hideKeyboard();
 
                 mMainActivity.commitFragment(listFragment);
-            }
-        });
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(_item);
+        }
     }
 
     private void hideKeyboard() {
@@ -194,7 +201,7 @@ public class CreateEditFragment extends BaseFragment {
         } catch (NullPointerException _error) {
 
             isNoteNotNull = false;
-            Log.e(LOG_TAG, _error.toString());
+//            Log.e(LOG_TAG, _error.toString());
             Log.i(LOG_TAG, "NOTE IS NOT RECEIVED. NOTE IS NULL.");
         }
     }

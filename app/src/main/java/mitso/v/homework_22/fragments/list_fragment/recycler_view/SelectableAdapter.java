@@ -6,6 +6,8 @@ import android.util.SparseBooleanArray;
 import java.util.ArrayList;
 import java.util.List;
 
+import mitso.v.homework_22.models.Note;
+
 public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private SparseBooleanArray      mSelectedItems;
@@ -45,5 +47,31 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
             items.add(mSelectedItems.keyAt(i));
 
         return items;
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private SparseBooleanArray      mTempSelectedItems;
+    
+    public void selectAllItems(List<Note> _noteList) {
+
+        mTempSelectedItems = mSelectedItems.clone();
+
+        clearSelection();
+
+        for (int i = 0; i < _noteList.size(); i++) {
+            mSelectedItems.put(i, true);
+            notifyItemChanged(i);
+        }
+    }
+
+    public void deselectAllItems() {
+
+        clearSelection();
+
+        for (int i = 0; i < mTempSelectedItems.size(); i++) {
+            mSelectedItems.put(mTempSelectedItems.keyAt(i), true);
+            notifyItemChanged(i);
+        }
     }
 }

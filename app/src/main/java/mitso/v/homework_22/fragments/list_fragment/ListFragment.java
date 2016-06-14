@@ -39,11 +39,15 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private NoteAdapter             mNoteAdapter;
     private List<Note>              mNoteList;
+    private boolean                 isRecyclerViewCreated;
 
     private Note                    mNote;
     private Note                    mOldNote;
 
     private DatabaseHelper          mDatabaseHelper;
+//    private boolean                 isDatabaseSet;
+
+    private boolean                 isNoteNotNull;
 
     @Nullable
     @Override
@@ -66,16 +70,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
             mNoteList = new ArrayList<>();
             addNote();
-
-            if (!mNoteList.isEmpty()) {
-                Log.i(LOG_TAG, "LIST ISN'T EMPTY.");
-
-                deleteOldNote();
-                initRecyclerView();
+            deleteOldNote();
+            if (isNoteNotNull)
                 setDatabaseData();
-
-            } else
-                Log.i(LOG_TAG, "LIST IS EMPTY.");
         }
 
         initButtons();
@@ -109,17 +106,13 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 Log.i(getDataTask.LOG_TAG, "ON SUCCESS.");
 
                 mNoteList = _result;
+
                 addNote();
-
-                if (!mNoteList.isEmpty()) {
-                    Log.i(LOG_TAG, "LIST ISN'T EMPTY.");
-
-                    deleteOldNote();
-                    initRecyclerView();
+                deleteOldNote();
+                if (isNoteNotNull)
                     setDatabaseData();
-
-                } else
-                    Log.i(LOG_TAG, "LIST IS EMPTY.");
+                else
+                    initRecyclerView();
 
                 mDatabaseHelper.close();
                 getDataTask.releaseCallback();
@@ -140,6 +133,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void setDatabaseData() {
 
+//        isDatabaseSet = false;
+
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
         final SetDataTask setDataTask = new SetDataTask(mMainActivity, mDatabaseHelper, mNoteList);
@@ -148,6 +143,10 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             public void onSuccess() {
 
                 Log.i(setDataTask.LOG_TAG, "ON SUCCESS.");
+//                isDatabaseSet = true;
+
+                if (!isRecyclerViewCreated)
+                    initRecyclerView();
 
                 mDatabaseHelper.close();
                 setDataTask.releaseCallback();
@@ -168,16 +167,29 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void initButtons() {
 
+
         mBinding.setClickerAdd(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (mActionMode != null)
-                    mActionMode.finish();
+//                if (mMainActivity.getDatabasePath(DatabaseHelper.DATABASE_NAME).exists()) {
 
-                releaseHandler();
+//                    if (isDatabaseSet) {
 
-                mMainActivity.commitFragment(new CreateEditFragment());
+                        if (mActionMode != null)
+                            mActionMode.finish();
+
+                        releaseHandler();
+                        mMainActivity.commitFragment(new CreateEditFragment());
+
+//                    } else
+//                        Toast.makeText(mMainActivity, "wait few sec and try again", Toast.LENGTH_SHORT).show();
+
+//                } else {
+//
+//                    releaseHandler();
+//                    mMainActivity.commitFragment(new CreateEditFragment());
+//                }
             }
         });
     }
@@ -190,12 +202,14 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 throw new NullPointerException();
 
             mNoteList.add(0, mNote);
+            isNoteNotNull = true;
             Log.i(LOG_TAG, "NOTE IS ADDED.");
 
         } catch (NullPointerException _error) {
 
-            Log.e(LOG_TAG, _error.toString());
-            Log.i(LOG_TAG, "NOTE IS NULL.");
+            isNoteNotNull = false;
+//            Log.e(LOG_TAG, _error.toString());
+            Log.i(LOG_TAG, "NOTE IS NOT ADDED. NOTE IS NULL.");
         }
     }
 
@@ -213,8 +227,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         } catch (NullPointerException _error) {
 
-            Log.e(LOG_TAG, _error.toString());
-            Log.i(LOG_TAG, "OLD NOTE IS NULL.");
+//            Log.e(LOG_TAG, _error.toString());
+            Log.i(LOG_TAG, "OLD NOTE IS NOT DELETED. OLD NOTE IS NULL.");
         }
     }
 
@@ -227,6 +241,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         mBinding.rvNotes.setLayoutManager(new GridLayoutManager(mMainActivity, 1));
         mBinding.rvNotes.addItemDecoration(new SpacingDecoration(spacingInPixels));
 
+        isRecyclerViewCreated = true;
         Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
 
         setHandler();
@@ -264,44 +279,56 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private ActionMode              mActionMode;
     private ActionMode.Callback     mActionModeCallBack;
 
+    private boolean                 isAllItemsSelected;
+    private Menu                    mSelectedMenu;
+
     @Override
     public void onClick(Note _note, int _position) {
 
-        if (mActionMode != null)
+//        if (isDatabaseSet) {
 
-            toggleSelection(_position);
+            if (mActionMode != null)
+                toggleSelection(_position);
 
-        else {
+            else {
 
-            releaseHandler();
+                releaseHandler();
 
-            final CreateEditFragment createEditFragment = new CreateEditFragment();
-            final Bundle bundle = new Bundle();
-            bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
-            createEditFragment.setArguments(bundle);
+                final CreateEditFragment createEditFragment = new CreateEditFragment();
+                final Bundle bundle = new Bundle();
+                bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
+                createEditFragment.setArguments(bundle);
 
-            mMainActivity.commitFragment(createEditFragment);
-        }
+                mMainActivity.commitFragment(createEditFragment);
+            }
+
+//        } else
+//            Toast.makeText(mMainActivity, "wait few sec and try again", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onLongClick(Note _note, int _position) {
 
-        if (mActionMode == null)
-            initActionMode();
+//        if (isDatabaseSet) {
 
-        toggleSelection(_position);
+            if (mActionMode == null)
+                initActionMode();
+
+            toggleSelection(_position);
+
+//        } else
+//            Toast.makeText(mMainActivity, "wait few sec and try again", Toast.LENGTH_SHORT).show();
     }
 
     private void toggleSelection(int _position) {
 
         mNoteAdapter.toggleSelection(_position);
-        int count = mNoteAdapter.getSelectedItemCount();
+        final int count = mNoteAdapter.getSelectedItemCount();
 
         if (count == 0)
             mActionMode.finish();
@@ -315,35 +342,42 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         mActionModeCallBack = new ActionMode.Callback() {
             @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                mode.getMenuInflater().inflate(R.menu.menu_selected, menu);
+            public boolean onCreateActionMode(ActionMode _mode, Menu _menu) {
+                _mode.getMenuInflater().inflate(R.menu.menu_selected, _menu);
+                mSelectedMenu = _menu;
                 return true;
             }
 
             @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            public boolean onPrepareActionMode(ActionMode _mode, Menu _menu) {
                 return false;
             }
 
             @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.mi_remove_sm:
+            public boolean onActionItemClicked(ActionMode _mode, MenuItem _item) {
+                switch (_item.getItemId()) {
+                    case R.id.mi_remove:
 
                         mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
+
                         /** !!! */
                         mNoteList = mNoteAdapter.getNoteList();
+                        if (!mNoteList.isEmpty())
+                            Log.i(LOG_TAG, "LIST ISN'T EMPTY.");
+                        else
+                            Log.i(LOG_TAG, "LIST IS EMPTY.");
+
                         setDatabaseData();
-                        mode.finish();
+                        _mode.finish();
 
                         return true;
-                    case R.id.mi_share_sm:
+                    case R.id.mi_share:
 
                         final StringBuilder stringBuilder = new StringBuilder();
 
                         for (int i = 0; i < mNoteAdapter.getSelectedItems().size(); i++) {
 
-                            int index = mNoteAdapter.getSelectedItems().get(i);
+                            final int index = mNoteAdapter.getSelectedItems().get(i);
 
                             stringBuilder.append(mNoteList.get(index).getFormattedDate());
                             stringBuilder.append(" - ");
@@ -363,7 +397,27 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         if (shareNoteIntent.resolveActivity(mMainActivity.getPackageManager()) != null)
                             startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_notes)));
                         else
-                            Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
+
+                        return true;
+                    case R.id.mi_select_all:
+
+                        if (!isAllItemsSelected) {
+
+                            mNoteAdapter.selectAllItems(mNoteList);
+                            mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
+                            mActionMode.invalidate();
+                            mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_filled));
+                            isAllItemsSelected = true;
+
+                        } else {
+
+                            mNoteAdapter.deselectAllItems();
+                            mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
+                            mActionMode.invalidate();
+                            mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_empty));
+                            isAllItemsSelected = false;
+                        }
 
                         return true;
                     default:
@@ -372,7 +426,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             }
 
             @Override
-            public void onDestroyActionMode(ActionMode mode) {
+            public void onDestroyActionMode(ActionMode _mode) {
                 mNoteAdapter.clearSelection();
                 mActionMode = null;
             }
