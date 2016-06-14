@@ -55,7 +55,6 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         _holder.getBinding().setClickerSelectNote(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
                 mNoteHandler.onLongClick(note, _holder.getAdapterPosition());
 
                 return true;
@@ -72,8 +71,8 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         // Reverse-sort the list
         Collections.sort(_positions, new Comparator<Integer>() {
             @Override
-            public int compare(Integer lhs, Integer rhs) {
-                return rhs - lhs;
+            public int compare(Integer _lhs, Integer _rhs) {
+                return _rhs - _lhs;
             }
         });
 
@@ -88,6 +87,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
             } else {
 
                 int count = 1;
+
                 while (_positions.size() > count && _positions.get(count).equals(_positions.get(count - 1) - 1))
                     ++count;
 

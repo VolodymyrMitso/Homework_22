@@ -45,7 +45,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private Note                    mOldNote;
 
     private DatabaseHelper          mDatabaseHelper;
-//    private boolean                 isDatabaseSet;
 
     private boolean                 isNoteNotNull;
 
@@ -133,8 +132,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void setDatabaseData() {
 
-//        isDatabaseSet = false;
-
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
         final SetDataTask setDataTask = new SetDataTask(mMainActivity, mDatabaseHelper, mNoteList);
@@ -143,7 +140,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             public void onSuccess() {
 
                 Log.i(setDataTask.LOG_TAG, "ON SUCCESS.");
-//                isDatabaseSet = true;
 
                 if (!isRecyclerViewCreated)
                     initRecyclerView();
@@ -167,29 +163,15 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void initButtons() {
 
-
         mBinding.setClickerAdd(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-//                if (mMainActivity.getDatabasePath(DatabaseHelper.DATABASE_NAME).exists()) {
+                if (mActionMode != null)
+                    mActionMode.finish();
 
-//                    if (isDatabaseSet) {
-
-                        if (mActionMode != null)
-                            mActionMode.finish();
-
-                        releaseHandler();
-                        mMainActivity.commitFragment(new CreateEditFragment());
-
-//                    } else
-//                        Toast.makeText(mMainActivity, "wait few sec and try again", Toast.LENGTH_SHORT).show();
-
-//                } else {
-//
-//                    releaseHandler();
-//                    mMainActivity.commitFragment(new CreateEditFragment());
-//                }
+                releaseHandler();
+                mMainActivity.commitFragment(new CreateEditFragment());
             }
         });
     }
@@ -208,7 +190,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         } catch (NullPointerException _error) {
 
             isNoteNotNull = false;
-//            Log.e(LOG_TAG, _error.toString());
             Log.i(LOG_TAG, "NOTE IS NOT ADDED. NOTE IS NULL.");
         }
     }
@@ -227,7 +208,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         } catch (NullPointerException _error) {
 
-//            Log.e(LOG_TAG, _error.toString());
             Log.i(LOG_TAG, "OLD NOTE IS NOT DELETED. OLD NOTE IS NULL.");
         }
     }
@@ -290,39 +270,29 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     @Override
     public void onClick(Note _note, int _position) {
 
-//        if (isDatabaseSet) {
+        if (mActionMode != null)
+            toggleSelection(_position);
 
-            if (mActionMode != null)
-                toggleSelection(_position);
+        else {
 
-            else {
+            releaseHandler();
 
-                releaseHandler();
+            final CreateEditFragment createEditFragment = new CreateEditFragment();
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
+            createEditFragment.setArguments(bundle);
 
-                final CreateEditFragment createEditFragment = new CreateEditFragment();
-                final Bundle bundle = new Bundle();
-                bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
-                createEditFragment.setArguments(bundle);
-
-                mMainActivity.commitFragment(createEditFragment);
-            }
-
-//        } else
-//            Toast.makeText(mMainActivity, "wait few sec and try again", Toast.LENGTH_SHORT).show();
+            mMainActivity.commitFragment(createEditFragment);
+        }
     }
 
     @Override
     public void onLongClick(Note _note, int _position) {
 
-//        if (isDatabaseSet) {
+        if (mActionMode == null)
+            initActionMode();
 
-            if (mActionMode == null)
-                initActionMode();
-
-            toggleSelection(_position);
-
-//        } else
-//            Toast.makeText(mMainActivity, "wait few sec and try again", Toast.LENGTH_SHORT).show();
+        toggleSelection(_position);
     }
 
     private void toggleSelection(int _position) {

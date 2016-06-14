@@ -4,8 +4,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,17 +12,17 @@ import mitso.v.homework_22.models.Note;
 
 public class GetDataTask extends AsyncTask<Void, Void, List<Note>> {
 
-    public String           LOG_TAG = Constants.GET_DATA_TASK_LOG_TAG;
+    public String       LOG_TAG = Constants.GET_DATA_TASK_LOG_TAG;
 
     public interface Callback{
         void onSuccess(List<Note> _result);
         void onFailure(Throwable _error);
     }
 
-    private DatabaseHelper  mDatabaseHelper;
-    private List<Note>      mNoteList;
-    private Callback        mCallback;
-    private Exception       mException;
+    private DatabaseHelper      mDatabaseHelper;
+    private List<Note>          mNoteList;
+    private Callback            mCallback;
+    private Exception           mException;
 
     public GetDataTask(DatabaseHelper mDatabaseHelper) {
         this.mDatabaseHelper = mDatabaseHelper;
@@ -44,20 +42,21 @@ public class GetDataTask extends AsyncTask<Void, Void, List<Note>> {
 
         try {
 
-            SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+            final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
 
-            String[] projection = {
-                    DatabaseHelper.COLUMN_NOTES
+            final String[] projection = {
+                    DatabaseHelper.COLUMN_ID, DatabaseHelper.COLUMN_BODY
             };
 
-            Cursor cursor = db.query(DatabaseHelper.DATABASE_TABLE, projection,
+            final Cursor cursor = db.query(DatabaseHelper.DATABASE_TABLE, projection,
                     null, null, null, null, null);
 
             while (cursor.moveToNext()) {
 
-                String bankString = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_NOTES));
+                final long id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID));
+                final String body = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_BODY));
 
-                Note note = new Gson().fromJson(bankString, Note.class);
+                final Note note = new Note(id, body);
 
                 mNoteList.add(note);
             }
@@ -65,10 +64,10 @@ public class GetDataTask extends AsyncTask<Void, Void, List<Note>> {
             cursor.close();
             db.close();
 
-        } catch (Exception e) {
+        } catch (Exception _error) {
 
-            e.printStackTrace();
-            mException = e;
+            _error.printStackTrace();
+            mException = _error;
         }
 
         return null;

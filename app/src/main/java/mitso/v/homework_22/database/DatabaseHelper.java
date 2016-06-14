@@ -12,7 +12,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String      DATABASE_TABLE = "notes_table";
 
     public static final String      KEY_ID  = "_id";
-    public static final String      COLUMN_NOTES = "notes_column";
+    public static final String      COLUMN_ID = "note_id";
+    public static final String      COLUMN_BODY = "note_body";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -23,7 +24,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         _sqLiteDatabase.execSQL("create table " + DATABASE_TABLE + " " +
                 "(" +
                 KEY_ID + " integer primary key autoincrement, " +
-                COLUMN_NOTES + " text not null" +
+                COLUMN_ID + " integer, " +
+                COLUMN_BODY + " text not null" +
                 ")");
     }
 

@@ -6,8 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.gson.Gson;
-
 import java.util.List;
 
 import mitso.v.homework_22.constants.Constants;
@@ -15,18 +13,18 @@ import mitso.v.homework_22.models.Note;
 
 public class SetDataTask extends AsyncTask<Void, Void, Void> {
 
-    public String           LOG_TAG = Constants.SET_DATA_TASK_LOG_TAG;
+    public String       LOG_TAG = Constants.SET_DATA_TASK_LOG_TAG;
 
     public interface Callback{
         void onSuccess();
         void onFailure(Throwable _error);
     }
 
-    private Context         mContext;
-    private DatabaseHelper  mDatabaseHelper;
-    private List<Note>      mNoteList;
-    private Callback        mCallback;
-    private Exception       mException;
+    private Context             mContext;
+    private DatabaseHelper      mDatabaseHelper;
+    private List<Note>          mNoteList;
+    private Callback            mCallback;
+    private Exception           mException;
 
     public void setCallback(Callback _callback) {
         mCallback = _callback;
@@ -59,10 +57,10 @@ public class SetDataTask extends AsyncTask<Void, Void, Void> {
                     for (int i = 0; i < mNoteList.size(); i++) {
 
                         final Note note = mNoteList.get(i);
-                        final String noteString = new Gson().toJson(note);
 
                         final ContentValues values = new ContentValues();
-                        values.put(DatabaseHelper.COLUMN_NOTES, noteString);
+                        values.put(DatabaseHelper.COLUMN_ID, note.getId());
+                        values.put(DatabaseHelper.COLUMN_BODY, note.getBody());
 
                         db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
                     }
@@ -79,10 +77,10 @@ public class SetDataTask extends AsyncTask<Void, Void, Void> {
                 for (int i = 0; i < mNoteList.size(); i++) {
 
                     final Note note = mNoteList.get(i);
-                    final String noteString = new Gson().toJson(note);
 
                     final ContentValues values = new ContentValues();
-                    values.put(DatabaseHelper.COLUMN_NOTES, noteString);
+                    values.put(DatabaseHelper.COLUMN_ID, note.getId());
+                    values.put(DatabaseHelper.COLUMN_BODY, note.getBody());
 
                     db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
                 }
