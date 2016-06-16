@@ -6,14 +6,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    public static final String      DATABASE_NAME = "notes_database";
+    public static final String      DATABASE_NAME = "notes_database.db";
     public static final int         DATABASE_VERSION = 1;
 
     public static final String      DATABASE_TABLE = "notes_table";
 
     public static final String      KEY_ID  = "_id";
-    public static final String      COLUMN_ID = "note_id";
-    public static final String      COLUMN_BODY = "note_body";
+    public static final String      COLUMN_NOTE_ID = "note_id";
+    public static final String      COLUMN_NOTE_BODY = "note_body";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -24,8 +24,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         _sqLiteDatabase.execSQL("create table " + DATABASE_TABLE + " " +
                 "(" +
                 KEY_ID + " integer primary key autoincrement, " +
-                COLUMN_ID + " integer, " +
-                COLUMN_BODY + " text not null" +
+                COLUMN_NOTE_ID + " integer, " +
+                COLUMN_NOTE_BODY + " text not null" +
                 ")");
     }
 

@@ -42,7 +42,7 @@ public class CreateEditFragment extends BaseFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_create_edit, container, false);
         final View rootView = mBinding.getRoot();
 
-        getNote();
+        receiveNote();
 
         setHasOptionsMenu(true);
         initActionBar();
@@ -77,8 +77,8 @@ public class CreateEditFragment extends BaseFragment {
                 public boolean onKey(View v, int keyCode, KeyEvent event) {
                     if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
 
-                        Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
-                        Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL");
+                        Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
+                        Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
                         mMainActivity.commitFragment(new ListFragment());
 
@@ -121,8 +121,8 @@ public class CreateEditFragment extends BaseFragment {
         switch (_item.getItemId()) {
             case android.R.id.home:
 
-                Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
-                Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL");
+                Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
+                Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
                 hideKeyboard();
 
@@ -155,7 +155,7 @@ public class CreateEditFragment extends BaseFragment {
                     final Bundle bundle = new Bundle();
                     bundle.putSerializable(Constants.NOTE_BUNDLE_OUT_KEY, note);
 
-                    Log.i(LOG_TAG, "NOTE IS SENT.");
+                    Log.i(LOG_TAG, "NEW NOTE IS SENT.");
 
                     if (isNoteNotNull) {
                         bundle.putSerializable(Constants.OLD_NOTE_BUNDLE_KEY, mNote);
@@ -165,7 +165,7 @@ public class CreateEditFragment extends BaseFragment {
 
                     listFragment.setArguments(bundle);
                 } else
-                    Log.i(LOG_TAG, "NOTE IS NOT SENT. NOTE IS NULL");
+                    Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
 
                 hideKeyboard();
 
@@ -187,7 +187,7 @@ public class CreateEditFragment extends BaseFragment {
         }
     }
 
-    private void getNote() {
+    private void receiveNote() {
 
         try {
             mNote = (Note) getArguments().getSerializable(Constants.NOTE_BUNDLE_IN_KEY);
@@ -201,7 +201,6 @@ public class CreateEditFragment extends BaseFragment {
         } catch (NullPointerException _error) {
 
             isNoteNotNull = false;
-//            Log.e(LOG_TAG, _error.toString());
             Log.i(LOG_TAG, "NOTE IS NOT RECEIVED. NOTE IS NULL.");
         }
     }

@@ -1,11 +1,13 @@
 package mitso.v.homework_22.models;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Note implements Serializable {
+public class Note implements Serializable, Comparable<Note> {
 
     private long        mId;
     private String      mBody;
@@ -31,6 +33,14 @@ public class Note implements Serializable {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int compareTo(@NonNull Note _another) {
+        if (this.getId() < _another.getId())
+            return 1;
+        else
+            return -1;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package mitso.v.homework_22.database;
+package mitso.v.homework_22.database.tasks;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,23 +8,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mitso.v.homework_22.constants.Constants;
+import mitso.v.homework_22.database.DatabaseHelper;
 import mitso.v.homework_22.models.Note;
 
-public class GetDataTask extends AsyncTask<Void, Void, List<Note>> {
+public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
 
-    public String       LOG_TAG = Constants.GET_DATA_TASK_LOG_TAG;
+    public String       LOG_TAG = Constants.GET_ALL_NOTES_TASK_LOG_TAG;
 
     public interface Callback{
         void onSuccess(List<Note> _result);
         void onFailure(Throwable _error);
     }
 
-    private DatabaseHelper      mDatabaseHelper;
+    private DatabaseHelper mDatabaseHelper;
     private List<Note>          mNoteList;
     private Callback            mCallback;
     private Exception           mException;
 
-    public GetDataTask(DatabaseHelper mDatabaseHelper) {
+    public GetAllNotesTask(DatabaseHelper mDatabaseHelper) {
         this.mDatabaseHelper = mDatabaseHelper;
         this.mNoteList = new ArrayList<>();
     }
@@ -45,7 +46,7 @@ public class GetDataTask extends AsyncTask<Void, Void, List<Note>> {
             final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
 
             final String[] projection = {
-                    DatabaseHelper.COLUMN_ID, DatabaseHelper.COLUMN_BODY
+                    DatabaseHelper.COLUMN_NOTE_ID, DatabaseHelper.COLUMN_NOTE_BODY
             };
 
             final Cursor cursor = db.query(DatabaseHelper.DATABASE_TABLE, projection,
@@ -53,8 +54,8 @@ public class GetDataTask extends AsyncTask<Void, Void, List<Note>> {
 
             while (cursor.moveToNext()) {
 
-                final long id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID));
-                final String body = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_BODY));
+                final long id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_NOTE_ID));
+                final String body = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_NOTE_BODY));
 
                 final Note note = new Note(id, body);
 

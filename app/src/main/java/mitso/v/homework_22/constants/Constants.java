@@ -2,8 +2,9 @@ package mitso.v.homework_22.constants;
 
 public class Constants {
 
-    public static final String GET_DATA_TASK_LOG_TAG = "_____GET_DATA_TASK_LOG_TAG";
-    public static final String SET_DATA_TASK_LOG_TAG = "_____SET_DATA_TASK_LOG_TAG";
+    public static final String GET_ALL_NOTES_TASK_LOG_TAG   = "_____GET_ALL_NOTES_TASK_LOG_TAG";
+    public static final String ADD_NOTE_TASK_LOG_TAG        = "_____ADD_NOTE_TASK_LOG_TAG";
+    public static final String DELETE_NOTE_TASK_LOG_TAG     = "_____DELETE_NOTE_TASK_LOG_TAG";
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 

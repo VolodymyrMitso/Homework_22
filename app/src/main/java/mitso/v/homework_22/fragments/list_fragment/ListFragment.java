@@ -16,13 +16,15 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import mitso.v.homework_22.R;
 import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
-import mitso.v.homework_22.database.GetDataTask;
-import mitso.v.homework_22.database.SetDataTask;
+import mitso.v.homework_22.database.tasks.AddNoteTask;
+import mitso.v.homework_22.database.tasks.DeleteNoteTask;
+import mitso.v.homework_22.database.tasks.GetAllNotesTask;
 import mitso.v.homework_22.databinding.FragmentListBinding;
 import mitso.v.homework_22.fragments.BaseFragment;
 import mitso.v.homework_22.fragments.create_fragment.CreateEditFragment;
@@ -41,12 +43,13 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private List<Note>              mNoteList;
     private boolean                 isRecyclerViewCreated;
 
-    private Note                    mNote;
+    private Note                    mNewNote;
     private Note                    mOldNote;
+    private boolean                 isNewNoteNotNull;
+    private boolean                 isOldNoteNotNull;
 
     private DatabaseHelper          mDatabaseHelper;
 
-    private boolean                 isNoteNotNull;
 
     @Nullable
     @Override
@@ -61,17 +64,16 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
             Log.i(LOG_TAG, "DATABASE EXISTS.");
 
-            getDatabaseData();
+            getAllNotesFromDatabase();
 
         } else {
 
             Log.i(LOG_TAG, "DATABASE DOESN'T EXIST.");
 
             mNoteList = new ArrayList<>();
-            addNote();
-            deleteOldNote();
-            if (isNoteNotNull)
-                setDatabaseData();
+            addNoteToList();
+            if (isNewNoteNotNull)
+                addNoteToDatabase();
         }
 
         initButtons();
@@ -93,72 +95,104 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         }
     }
 
-    private void getDatabaseData() {
+    private void getAllNotesFromDatabase() {
 
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
-        final GetDataTask getDataTask = new GetDataTask(mDatabaseHelper);
-        getDataTask.setCallback(new GetDataTask.Callback() {
+        final GetAllNotesTask getAllNotesTask = new GetAllNotesTask(mDatabaseHelper);
+        getAllNotesTask.setCallback(new GetAllNotesTask.Callback() {
             @Override
             public void onSuccess(List<Note> _result) {
 
-                Log.i(getDataTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(getAllNotesTask.LOG_TAG, "ON SUCCESS.");
 
                 mNoteList = _result;
 
-                addNote();
-                deleteOldNote();
-                if (isNoteNotNull)
-                    setDatabaseData();
+                addNoteToList();
+                if (isNewNoteNotNull)
+                    addNoteToDatabase();
                 else
                     initRecyclerView();
 
                 mDatabaseHelper.close();
-                getDataTask.releaseCallback();
+                getAllNotesTask.releaseCallback();
             }
 
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(getDataTask.LOG_TAG, "ON FAILURE.");
-                Log.e(getDataTask.LOG_TAG, _error.toString());
+                Log.i(getAllNotesTask.LOG_TAG, "ON FAILURE.");
+                Log.e(getAllNotesTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
-                getDataTask.releaseCallback();
+                getAllNotesTask.releaseCallback();
             }
         });
-        getDataTask.execute();
+        getAllNotesTask.execute();
     }
 
-    private void setDatabaseData() {
+    private void addNoteToDatabase() {
 
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
-        final SetDataTask setDataTask = new SetDataTask(mMainActivity, mDatabaseHelper, mNoteList);
-        setDataTask.setCallback(new SetDataTask.Callback() {
+        final AddNoteTask addNoteTask = new AddNoteTask(mDatabaseHelper, mNewNote);
+        addNoteTask.setCallback(new AddNoteTask.Callback() {
             @Override
             public void onSuccess() {
 
-                Log.i(setDataTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(addNoteTask.LOG_TAG, "ON SUCCESS.");
 
-                if (!isRecyclerViewCreated)
+                deleteNoteFromList();
+                if (isOldNoteNotNull)
+                    deleteNoteFromDatabase();
+                else
                     initRecyclerView();
 
                 mDatabaseHelper.close();
-                setDataTask.releaseCallback();
+                addNoteTask.releaseCallback();
             }
 
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(setDataTask.LOG_TAG, "ON FAILURE.");
-                Log.e(setDataTask.LOG_TAG, _error.toString());
+                Log.i(addNoteTask.LOG_TAG, "ON FAILURE.");
+                Log.e(addNoteTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
-                setDataTask.releaseCallback();
+                addNoteTask.releaseCallback();
             }
         });
-        setDataTask.execute();
+        addNoteTask.execute();
+    }
+
+    private void deleteNoteFromDatabase() {
+
+        mDatabaseHelper = new DatabaseHelper(mMainActivity);
+
+        final DeleteNoteTask deleteNoteTask = new DeleteNoteTask(mDatabaseHelper, mOldNote);
+        deleteNoteTask.setCallback(new DeleteNoteTask.Callback() {
+            @Override
+            public void onSuccess() {
+
+                Log.i(deleteNoteTask.LOG_TAG, "ON SUCCESS.");
+
+                initRecyclerView();
+
+                mDatabaseHelper.close();
+                deleteNoteTask.releaseCallback();
+            }
+
+            @Override
+            public void onFailure(Throwable _error) {
+
+                Log.i(deleteNoteTask.LOG_TAG, "ON FAILURE.");
+                Log.e(deleteNoteTask.LOG_TAG, _error.toString());
+
+                mDatabaseHelper.close();
+                deleteNoteTask.releaseCallback();
+            }
+        });
+        deleteNoteTask.execute();
     }
 
     private void initButtons() {
@@ -176,25 +210,25 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         });
     }
 
-    private void addNote() {
+    private void addNoteToList() {
 
         try {
-            mNote = (Note) getArguments().getSerializable(Constants.NOTE_BUNDLE_OUT_KEY);
-            if (mNote == null)
+            mNewNote = (Note) getArguments().getSerializable(Constants.NOTE_BUNDLE_OUT_KEY);
+            if (mNewNote == null)
                 throw new NullPointerException();
 
-            mNoteList.add(0, mNote);
-            isNoteNotNull = true;
-            Log.i(LOG_TAG, "NOTE IS ADDED.");
+            mNoteList.add(mNewNote);
+            isNewNoteNotNull = true;
+            Log.i(LOG_TAG, "NEW NOTE IS ADDED TO LIST.");
 
         } catch (NullPointerException _error) {
 
-            isNoteNotNull = false;
-            Log.i(LOG_TAG, "NOTE IS NOT ADDED. NOTE IS NULL.");
+            isNewNoteNotNull = false;
+            Log.i(LOG_TAG, "NEW NOTE IS NOT ADDED TO LIST. NEW NOTE IS NULL.");
         }
     }
 
-    private void deleteOldNote() {
+    private void deleteNoteFromList() {
 
         try {
             mOldNote = (Note) getArguments().getSerializable(Constants.OLD_NOTE_BUNDLE_KEY);
@@ -203,16 +237,20 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
             if (mNoteList.contains(mOldNote)) {
                 mNoteList.remove(mOldNote);
-                Log.i(LOG_TAG, "OLD NOTE IS DELETED.");
+                isOldNoteNotNull = true;
+                Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM LIST.");
             }
 
         } catch (NullPointerException _error) {
 
-            Log.i(LOG_TAG, "OLD NOTE IS NOT DELETED. OLD NOTE IS NULL.");
+            isOldNoteNotNull = false;
+            Log.i(LOG_TAG, "OLD NOTE IS NOT DELETED FROM LIST. OLD NOTE IS NULL.");
         }
     }
 
     private void initRecyclerView() {
+
+        Collections.sort(mNoteList);
 
         mNoteAdapter = new NoteAdapter(mMainActivity, mNoteList);
         final int spacingInPixels = mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_10dp);
@@ -337,7 +375,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         else
                             Log.i(LOG_TAG, "LIST IS EMPTY.");
 
-                        setDatabaseData();
+                        addNoteToDatabase();
                         _mode.finish();
 
                         return true;
