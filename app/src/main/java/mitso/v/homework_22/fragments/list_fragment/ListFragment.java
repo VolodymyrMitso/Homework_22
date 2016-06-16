@@ -22,8 +22,9 @@ import java.util.List;
 import mitso.v.homework_22.R;
 import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
-import mitso.v.homework_22.database.tasks.AddNoteTask;
-import mitso.v.homework_22.database.tasks.DeleteNoteTask;
+import mitso.v.homework_22.database.tasks.AddNewNoteTask;
+import mitso.v.homework_22.database.tasks.DeleteOldNoteTask;
+import mitso.v.homework_22.database.tasks.DeleteSelectedNotesTask;
 import mitso.v.homework_22.database.tasks.GetAllNotesTask;
 import mitso.v.homework_22.databinding.FragmentListBinding;
 import mitso.v.homework_22.fragments.BaseFragment;
@@ -135,12 +136,12 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
-        final AddNoteTask addNoteTask = new AddNoteTask(mDatabaseHelper, mNewNote);
-        addNoteTask.setCallback(new AddNoteTask.Callback() {
+        final AddNewNoteTask addNewNoteTask = new AddNewNoteTask(mDatabaseHelper, mNewNote);
+        addNewNoteTask.setCallback(new AddNewNoteTask.Callback() {
             @Override
             public void onSuccess() {
 
-                Log.i(addNoteTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(addNewNoteTask.LOG_TAG, "ON SUCCESS.");
 
                 deleteNoteFromList();
                 if (isOldNoteNotNull)
@@ -149,50 +150,50 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                     initRecyclerView();
 
                 mDatabaseHelper.close();
-                addNoteTask.releaseCallback();
+                addNewNoteTask.releaseCallback();
             }
 
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(addNoteTask.LOG_TAG, "ON FAILURE.");
-                Log.e(addNoteTask.LOG_TAG, _error.toString());
+                Log.i(addNewNoteTask.LOG_TAG, "ON FAILURE.");
+                Log.e(addNewNoteTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
-                addNoteTask.releaseCallback();
+                addNewNoteTask.releaseCallback();
             }
         });
-        addNoteTask.execute();
+        addNewNoteTask.execute();
     }
 
     private void deleteNoteFromDatabase() {
 
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
-        final DeleteNoteTask deleteNoteTask = new DeleteNoteTask(mDatabaseHelper, mOldNote);
-        deleteNoteTask.setCallback(new DeleteNoteTask.Callback() {
+        final DeleteOldNoteTask deleteOldNoteTask = new DeleteOldNoteTask(mDatabaseHelper, mOldNote);
+        deleteOldNoteTask.setCallback(new DeleteOldNoteTask.Callback() {
             @Override
             public void onSuccess() {
 
-                Log.i(deleteNoteTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(deleteOldNoteTask.LOG_TAG, "ON SUCCESS.");
 
                 initRecyclerView();
 
                 mDatabaseHelper.close();
-                deleteNoteTask.releaseCallback();
+                deleteOldNoteTask.releaseCallback();
             }
 
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(deleteNoteTask.LOG_TAG, "ON FAILURE.");
-                Log.e(deleteNoteTask.LOG_TAG, _error.toString());
+                Log.i(deleteOldNoteTask.LOG_TAG, "ON FAILURE.");
+                Log.e(deleteOldNoteTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
-                deleteNoteTask.releaseCallback();
+                deleteOldNoteTask.releaseCallback();
             }
         });
-        deleteNoteTask.execute();
+        deleteOldNoteTask.execute();
     }
 
     private void initButtons() {
@@ -305,6 +306,40 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private boolean                 isAllItemsSelected;
     private Menu                    mSelectedMenu;
 
+    private List<Note>              mSelectedNotes;
+    private List<Note>              mTempSelectedNotes;
+
+    private void deleteSelectedNotesFromDatabase() {
+
+        mDatabaseHelper = new DatabaseHelper(mMainActivity);
+
+        final DeleteSelectedNotesTask deleteSelectedNotesTask = new DeleteSelectedNotesTask(mDatabaseHelper, mSelectedNotes);
+        deleteSelectedNotesTask.setCallback(new DeleteSelectedNotesTask.Callback() {
+            @Override
+            public void onSuccess() {
+
+                Log.i(deleteSelectedNotesTask.LOG_TAG, "ON SUCCESS.");
+
+                mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
+                mActionMode.finish();
+
+                mDatabaseHelper.close();
+                deleteSelectedNotesTask.releaseCallback();
+            }
+
+            @Override
+            public void onFailure(Throwable _error) {
+
+                Log.i(deleteSelectedNotesTask.LOG_TAG, "ON FAILURE.");
+                Log.e(deleteSelectedNotesTask.LOG_TAG, _error.toString());
+
+                mDatabaseHelper.close();
+                deleteSelectedNotesTask.releaseCallback();
+            }
+        });
+        deleteSelectedNotesTask.execute();
+    }
+
     @Override
     public void onClick(Note _note, int _position) {
 
@@ -335,6 +370,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void toggleSelection(int _position) {
 
+        if (mSelectedNotes.contains(mNoteList.get(_position)))
+            mSelectedNotes.remove(mNoteList.get(_position));
+        else
+            mSelectedNotes.add(mNoteList.get(_position));
+
         mNoteAdapter.toggleSelection(_position);
         final int count = mNoteAdapter.getSelectedItemCount();
 
@@ -347,6 +387,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     }
 
     private void initActionMode() {
+
+        mBinding.floatingActionButton.hide();
+
+        mSelectedNotes = new ArrayList<>();
+        mTempSelectedNotes = new ArrayList<>();
 
         mActionModeCallBack = new ActionMode.Callback() {
             @Override
@@ -366,17 +411,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 switch (_item.getItemId()) {
                     case R.id.mi_remove:
 
-                        mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
-
-                        /** !!! */
-                        mNoteList = mNoteAdapter.getNoteList();
-                        if (!mNoteList.isEmpty())
-                            Log.i(LOG_TAG, "LIST ISN'T EMPTY.");
-                        else
-                            Log.i(LOG_TAG, "LIST IS EMPTY.");
-
-                        addNoteToDatabase();
-                        _mode.finish();
+                        deleteSelectedNotesFromDatabase();
 
                         return true;
                     case R.id.mi_share:
@@ -407,12 +442,18 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         else
                             Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
 
+                        _mode.finish();
+
                         return true;
                     case R.id.mi_select_all:
 
                         if (!isAllItemsSelected) {
 
                             mNoteAdapter.selectAllItems(mNoteList);
+
+                            mTempSelectedNotes = mSelectedNotes;
+                            mSelectedNotes = new ArrayList<>(mNoteList);
+
                             mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
                             mActionMode.invalidate();
                             mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_filled));
@@ -421,6 +462,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         } else {
 
                             mNoteAdapter.deselectAllItems();
+
+                            mSelectedNotes = mTempSelectedNotes;
+
                             mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
                             mActionMode.invalidate();
                             mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_empty));
@@ -435,8 +479,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
             @Override
             public void onDestroyActionMode(ActionMode _mode) {
+                mSelectedNotes.clear();
+                mTempSelectedNotes.clear();
                 mNoteAdapter.clearSelection();
                 mActionMode = null;
+                mBinding.floatingActionButton.show();
             }
         };
 

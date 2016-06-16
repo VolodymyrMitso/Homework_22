@@ -1,17 +1,18 @@
 package mitso.v.homework_22.database.tasks;
 
-import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import java.util.List;
 
 import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
 import mitso.v.homework_22.models.Note;
 
-public class AddNoteTask extends AsyncTask<Void, Void, Void> {
+public class DeleteSelectedNotesTask extends AsyncTask<Void, Void, Void> {
 
-    public String       LOG_TAG = Constants.ADD_NOTE_TASK_LOG_TAG;
+    public String       LOG_TAG = Constants.DELETE_OLD_NOTE_TASK_LOG_TAG;
 
     public interface Callback{
         void onSuccess();
@@ -19,7 +20,7 @@ public class AddNoteTask extends AsyncTask<Void, Void, Void> {
     }
 
     private DatabaseHelper      mDatabaseHelper;
-    private Note                mNote;
+    private List<Note>          mNoteList;
     private Callback            mCallback;
     private Exception           mException;
 
@@ -31,9 +32,9 @@ public class AddNoteTask extends AsyncTask<Void, Void, Void> {
         mCallback = null;
     }
 
-    public AddNoteTask(DatabaseHelper _databaseHelper, Note _note) {
+    public DeleteSelectedNotesTask(DatabaseHelper _databaseHelper, List<Note> _noteList) {
         this.mDatabaseHelper = _databaseHelper;
-        this.mNote = _note;
+        this.mNoteList = _noteList;
     }
 
     @Override
@@ -42,15 +43,18 @@ public class AddNoteTask extends AsyncTask<Void, Void, Void> {
         try {
             final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
 
-            final ContentValues values = new ContentValues();
-            values.put(DatabaseHelper.COLUMN_NOTE_ID, mNote.getId());
-            values.put(DatabaseHelper.COLUMN_NOTE_BODY, mNote.getBody());
+            for (int i = 0; i < mNoteList.size(); i++) {
 
-            db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
+                final Note note = mNoteList.get(i);
+
+                db.delete(DatabaseHelper.DATABASE_TABLE,
+                        DatabaseHelper.COLUMN_NOTE_ID + " = " + note.getId(),
+                        null);
+            }
 
             db.close();
 
-            Log.i(LOG_TAG, "NEW NOTE IS ADDED TO DATABASE.");
+            Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM DATABASE.");
 
         } catch (Exception _error) {
             _error.printStackTrace();

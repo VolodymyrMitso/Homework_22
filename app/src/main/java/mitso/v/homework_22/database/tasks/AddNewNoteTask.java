@@ -1,5 +1,6 @@
 package mitso.v.homework_22.database.tasks;
 
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -8,9 +9,9 @@ import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
 import mitso.v.homework_22.models.Note;
 
-public class DeleteNoteTask extends AsyncTask<Void, Void, Void> {
+public class AddNewNoteTask extends AsyncTask<Void, Void, Void> {
 
-    public String       LOG_TAG = Constants.DELETE_NOTE_TASK_LOG_TAG;
+    public String       LOG_TAG = Constants.ADD_NEW_NOTE_TASK_LOG_TAG;
 
     public interface Callback{
         void onSuccess();
@@ -30,7 +31,7 @@ public class DeleteNoteTask extends AsyncTask<Void, Void, Void> {
         mCallback = null;
     }
 
-    public DeleteNoteTask(DatabaseHelper _databaseHelper, Note _note) {
+    public AddNewNoteTask(DatabaseHelper _databaseHelper, Note _note) {
         this.mDatabaseHelper = _databaseHelper;
         this.mNote = _note;
     }
@@ -41,13 +42,15 @@ public class DeleteNoteTask extends AsyncTask<Void, Void, Void> {
         try {
             final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
 
-            db.delete(DatabaseHelper.DATABASE_TABLE,
-                    DatabaseHelper.COLUMN_NOTE_ID + " = " + mNote.getId(),
-                    null);
+            final ContentValues values = new ContentValues();
+            values.put(DatabaseHelper.COLUMN_NOTE_ID, mNote.getId());
+            values.put(DatabaseHelper.COLUMN_NOTE_BODY, mNote.getBody());
+
+            db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
 
             db.close();
 
-            Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM DATABASE.");
+            Log.i(LOG_TAG, "NEW NOTE IS ADDED TO DATABASE.");
 
         } catch (Exception _error) {
             _error.printStackTrace();

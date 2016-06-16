@@ -100,6 +100,8 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
                     _positions.remove(0);
             }
         }
+
+        Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM LIST");
     }
 
     private void removeNote(int _position) {
