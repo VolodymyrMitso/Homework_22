@@ -12,7 +12,7 @@ import mitso.v.homework_22.models.Note;
 
 public class DeleteSelectedNotesTask extends AsyncTask<Void, Void, Void> {
 
-    public String       LOG_TAG = Constants.DELETE_OLD_NOTE_TASK_LOG_TAG;
+    public String       LOG_TAG = Constants.DELETE_SELECTED_NOTES_TASK_LOG_TAG;
 
     public interface Callback{
         void onSuccess();
@@ -23,6 +23,7 @@ public class DeleteSelectedNotesTask extends AsyncTask<Void, Void, Void> {
     private List<Note>          mNoteList;
     private Callback            mCallback;
     private Exception           mException;
+    private SQLiteDatabase      mSQLiteDatabase;
 
     public void setCallback(Callback _callback) {
         mCallback = _callback;
@@ -38,27 +39,31 @@ public class DeleteSelectedNotesTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... _voids) {
+    protected Void doInBackground(Void ... _params) {
 
         try {
-            final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+            mSQLiteDatabase = mDatabaseHelper.getWritableDatabase();
 
             for (int i = 0; i < mNoteList.size(); i++) {
 
                 final Note note = mNoteList.get(i);
 
-                db.delete(DatabaseHelper.DATABASE_TABLE,
+                mSQLiteDatabase.delete(DatabaseHelper.DATABASE_TABLE,
                         DatabaseHelper.COLUMN_NOTE_ID + " = " + note.getId(),
                         null);
             }
 
-            db.close();
-
-            Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM DATABASE.");
-
         } catch (Exception _error) {
+
             _error.printStackTrace();
             mException = _error;
+
+        } finally {
+
+            if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
+                mSQLiteDatabase.close();
+
+            Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM DATABASE.");
         }
 
         return null;

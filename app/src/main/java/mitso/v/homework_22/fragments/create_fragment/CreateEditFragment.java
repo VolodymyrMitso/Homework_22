@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.view.ContextThemeWrapper;
 import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -37,9 +38,12 @@ public class CreateEditFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater _inflater, @Nullable ViewGroup _container, @Nullable Bundle _savedInstanceState) {
 
-        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_create_edit, container, false);
+        final ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(mMainActivity, R.style.FragmentTheme);
+        final LayoutInflater layoutInflater = _inflater.cloneInContext(contextThemeWrapper);
+
+        mBinding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_create_edit, _container, false);
         final View rootView = mBinding.getRoot();
 
         receiveNote();
@@ -56,6 +60,8 @@ public class CreateEditFragment extends BaseFragment {
 
          initBackButton();
     }
+
+
 
     private void initBackButton() {
 

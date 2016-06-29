@@ -101,7 +101,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
             }
         }
 
-        Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM LIST");
+        Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM LIST.");
     }
 
     private void removeNote(int _position) {
@@ -135,8 +135,57 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         }
     }
 
-    /** !!! */
-    public List<Note> getNoteList() {
-        return mNoteList;
+//    /** !!! */
+//    public List<Note> getNoteList() {
+//        return mNoteList;
+//    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void removeItem(int _position) {
+        mNoteList.remove(_position);
+        notifyItemRemoved(_position);
+    }
+
+    public void addItem(int _position, Note _note) {
+        mNoteList.add(_position, _note);
+        notifyItemInserted(_position);
+    }
+
+    public void moveItem(int _fromPosition, int _toPosition) {
+        final Note note = mNoteList.remove(_fromPosition);
+        mNoteList.add(_toPosition, note);
+        notifyItemMoved(_fromPosition, _toPosition);
+    }
+
+    public void animateTo(List<Note> _noteList) {
+        applyAndAnimateRemovals(_noteList);
+        applyAndAnimateAdditions(_noteList);
+        applyAndAnimateMovedItems(_noteList);
+    }
+
+    private void applyAndAnimateRemovals(List<Note> _newNotes) {
+        for (int i = mNoteList.size() - 1; i >= 0; i--) {
+            final Note note = mNoteList.get(i);
+            if (!_newNotes.contains(note))
+                removeItem(i);
+        }
+    }
+
+    private void applyAndAnimateAdditions(List<Note> _newNotes) {
+        for (int i = 0, count = _newNotes.size(); i < count; i++) {
+            final Note note = _newNotes.get(i);
+            if (!mNoteList.contains(note))
+                addItem(i, note);
+        }
+    }
+
+    private void applyAndAnimateMovedItems(List<Note> _newNotes) {
+        for (int toPosition = _newNotes.size() - 1; toPosition >= 0; toPosition--) {
+            final Note note = _newNotes.get(toPosition);
+            final int fromPosition = mNoteList.indexOf(note);
+            if (fromPosition >= 0 && fromPosition != toPosition)
+                moveItem(fromPosition, toPosition);
+        }
     }
 }

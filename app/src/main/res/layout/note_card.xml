@@ -35,9 +35,7 @@
             android:textColor="@color/c_card_text"
             android:textSize="@dimen/d_text_14sp"
             tools:text="note body"
-            android:maxHeight="35dp"/>
-
-
+            android:maxLines="2"/>
 
         <TextView
             android:layout_width="match_parent"

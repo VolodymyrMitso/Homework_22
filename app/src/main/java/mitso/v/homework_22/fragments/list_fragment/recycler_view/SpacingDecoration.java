@@ -19,7 +19,7 @@ public class SpacingDecoration extends RecyclerView.ItemDecoration {
         _outRect.right = mSpace;
         _outRect.bottom = mSpace;
 
-        if (_parent.getChildLayoutPosition(_view) == 0)
+        if (_parent. getChildAdapterPosition(_view) == 0)
             _outRect.top = mSpace;
         else
             _outRect.top = 0;

@@ -22,6 +22,7 @@ public class AddNewNoteTask extends AsyncTask<Void, Void, Void> {
     private Note                mNote;
     private Callback            mCallback;
     private Exception           mException;
+    private SQLiteDatabase      mSQLiteDatabase;
 
     public void setCallback(Callback _callback) {
         mCallback = _callback;
@@ -37,24 +38,28 @@ public class AddNewNoteTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... _voids) {
+    protected Void doInBackground(Void ... _params) {
 
         try {
-            final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+            mSQLiteDatabase = mDatabaseHelper.getWritableDatabase();
 
             final ContentValues values = new ContentValues();
             values.put(DatabaseHelper.COLUMN_NOTE_ID, mNote.getId());
             values.put(DatabaseHelper.COLUMN_NOTE_BODY, mNote.getBody());
 
-            db.insert(DatabaseHelper.DATABASE_TABLE, null, values);
-
-            db.close();
-
-            Log.i(LOG_TAG, "NEW NOTE IS ADDED TO DATABASE.");
+            mSQLiteDatabase.insert(DatabaseHelper.DATABASE_TABLE, null, values);
 
         } catch (Exception _error) {
+
             _error.printStackTrace();
             mException = _error;
+
+        } finally {
+
+            if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
+                mSQLiteDatabase.close();
+
+            Log.i(LOG_TAG, "NEW NOTE IS ADDED TO DATABASE.");
         }
 
         return null;

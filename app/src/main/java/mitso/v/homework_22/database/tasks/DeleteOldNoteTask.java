@@ -21,6 +21,7 @@ public class DeleteOldNoteTask extends AsyncTask<Void, Void, Void> {
     private Note                mNote;
     private Callback            mCallback;
     private Exception           mException;
+    private SQLiteDatabase      mSQLiteDatabase;
 
     public void setCallback(Callback _callback) {
         mCallback = _callback;
@@ -36,22 +37,26 @@ public class DeleteOldNoteTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... _voids) {
+    protected Void doInBackground(Void ... _params) {
 
         try {
-            final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+            mSQLiteDatabase = mDatabaseHelper.getWritableDatabase();
 
-            db.delete(DatabaseHelper.DATABASE_TABLE,
+            mSQLiteDatabase.delete(DatabaseHelper.DATABASE_TABLE,
                     DatabaseHelper.COLUMN_NOTE_ID + " = " + mNote.getId(),
                     null);
 
-            db.close();
-
-            Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM DATABASE.");
-
         } catch (Exception _error) {
+
             _error.printStackTrace();
             mException = _error;
+
+        } finally {
+
+            if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
+                mSQLiteDatabase.close();
+
+            Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM DATABASE.");
         }
 
         return null;

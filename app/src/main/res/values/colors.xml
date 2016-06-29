@@ -4,8 +4,9 @@
 
     <color name="c_action_bar">#90A4AE</color>
     <color name="c_action_bar_text">#ffffff</color>
+    <color name="c_action_bar_accent">#ffffff</color>
 
-    <color name="c_accent">#000000</color>
+    <color name="c_create_edit_accent">#000000</color>
     <color name="c_create_edit_text">#000000</color>
 
     <color name="c_card_selected">#2196F3</color>

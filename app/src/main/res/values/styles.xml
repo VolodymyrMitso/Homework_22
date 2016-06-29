@@ -1,8 +1,16 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/c_action_bar</item>
+    <style name="ActivityTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimaryDark">@color/c_status_bar</item>
-        <item name="colorAccent">@color/c_accent</item>
+
+        <item name="colorPrimary">@color/c_action_bar</item>
         <item name="android:actionModeBackground">@color/c_action_bar</item>
+        <item name="android:editTextColor">@color/c_action_bar_text</item>
+        <item name="colorAccent">@color/c_action_bar_accent</item>
+    </style>
+
+    <style name="FragmentTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimaryDark">@color/c_status_bar</item>
+        <item name="colorPrimary">@color/c_action_bar</item>
+        <item name="colorAccent">@color/c_create_edit_accent</item>
     </style>
 </resources>

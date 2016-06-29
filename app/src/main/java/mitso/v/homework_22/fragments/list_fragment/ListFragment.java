@@ -4,15 +4,19 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.SearchView;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -42,7 +46,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private NoteAdapter             mNoteAdapter;
     private List<Note>              mNoteList;
-    private boolean                 isRecyclerViewCreated;
 
     private Note                    mNewNote;
     private Note                    mOldNote;
@@ -54,12 +57,13 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater _inflater, @Nullable ViewGroup _container, @Nullable Bundle _savedInstanceState) {
 
-        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_list, container, false);
+        mBinding = DataBindingUtil.inflate(_inflater, R.layout.fragment_list, _container, false);
         final View rootView = mBinding.getRoot();
 
         initActionBar();
+        setHasOptionsMenu(true);
 
         if (mMainActivity.getDatabasePath(DatabaseHelper.DATABASE_NAME).exists()) {
 
@@ -74,7 +78,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             mNoteList = new ArrayList<>();
             addNoteToList();
             if (isNewNoteNotNull)
-                addNoteToDatabase();
+                addNewNoteToDatabase();
         }
 
         initButtons();
@@ -91,8 +95,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             mMainActivity.getSupportActionBar().setDisplayShowHomeEnabled(false);
 
             mMainActivity.getSupportActionBar().setTitle(Html.fromHtml("<font color='#" +
-                    Integer.toHexString(getResources().getColor(R.color.c_action_bar_text)).substring(2) +
-                    "'>" + getResources().getString(R.string.s_app_name) + "</font>"));
+                    Integer.toHexString(mMainActivity.getResources().getColor(R.color.c_action_bar_text)).substring(2) +
+                    "'>" + mMainActivity.getResources().getString(R.string.s_app_name) + "</font>"));
         }
     }
 
@@ -106,16 +110,16 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             public void onSuccess(List<Note> _result) {
 
                 Log.i(getAllNotesTask.LOG_TAG, "ON SUCCESS.");
+                mDatabaseHelper.close();
 
                 mNoteList = _result;
 
                 addNoteToList();
                 if (isNewNoteNotNull)
-                    addNoteToDatabase();
+                    addNewNoteToDatabase();
                 else
                     initRecyclerView();
 
-                mDatabaseHelper.close();
                 getAllNotesTask.releaseCallback();
             }
 
@@ -132,7 +136,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         getAllNotesTask.execute();
     }
 
-    private void addNoteToDatabase() {
+    private void addNewNoteToDatabase() {
 
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
@@ -142,14 +146,14 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             public void onSuccess() {
 
                 Log.i(addNewNoteTask.LOG_TAG, "ON SUCCESS.");
+                mDatabaseHelper.close();
 
                 deleteNoteFromList();
                 if (isOldNoteNotNull)
-                    deleteNoteFromDatabase();
+                    deleteOldNoteFromDatabase();
                 else
                     initRecyclerView();
 
-                mDatabaseHelper.close();
                 addNewNoteTask.releaseCallback();
             }
 
@@ -166,7 +170,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         addNewNoteTask.execute();
     }
 
-    private void deleteNoteFromDatabase() {
+    private void deleteOldNoteFromDatabase() {
 
         mDatabaseHelper = new DatabaseHelper(mMainActivity);
 
@@ -176,10 +180,10 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             public void onSuccess() {
 
                 Log.i(deleteOldNoteTask.LOG_TAG, "ON SUCCESS.");
+                mDatabaseHelper.close();
 
                 initRecyclerView();
 
-                mDatabaseHelper.close();
                 deleteOldNoteTask.releaseCallback();
             }
 
@@ -260,7 +264,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         mBinding.rvNotes.setLayoutManager(new GridLayoutManager(mMainActivity, 1));
         mBinding.rvNotes.addItemDecoration(new SpacingDecoration(spacingInPixels));
 
-        isRecyclerViewCreated = true;
         Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
 
         setHandler();
@@ -298,10 +301,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private ActionMode              mActionMode;
-    private ActionMode.Callback     mActionModeCallBack;
 
     private boolean                 isAllItemsSelected;
     private Menu                    mSelectedMenu;
@@ -319,11 +321,14 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             public void onSuccess() {
 
                 Log.i(deleteSelectedNotesTask.LOG_TAG, "ON SUCCESS.");
+                mDatabaseHelper.close();
 
                 mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
+                mNoteList.removeAll(mSelectedNotes);
+                if (isSearchViewOpened)
+                    mFilteredList.removeAll(mSelectedNotes);
                 mActionMode.finish();
 
-                mDatabaseHelper.close();
                 deleteSelectedNotesTask.releaseCallback();
             }
 
@@ -370,10 +375,20 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void toggleSelection(int _position) {
 
-        if (mSelectedNotes.contains(mNoteList.get(_position)))
-            mSelectedNotes.remove(mNoteList.get(_position));
-        else
-            mSelectedNotes.add(mNoteList.get(_position));
+        if (isSearchViewOpened) {
+
+            if (mSelectedNotes.contains(mFilteredList.get(_position)))
+                mSelectedNotes.remove(mFilteredList.get(_position));
+            else
+                mSelectedNotes.add(mFilteredList.get(_position));
+
+        } else {
+
+            if (mSelectedNotes.contains(mNoteList.get(_position)))
+                mSelectedNotes.remove(mNoteList.get(_position));
+            else
+                mSelectedNotes.add(mNoteList.get(_position));
+        }
 
         mNoteAdapter.toggleSelection(_position);
         final int count = mNoteAdapter.getSelectedItemCount();
@@ -388,16 +403,21 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void initActionMode() {
 
-        mBinding.floatingActionButton.hide();
-
-        mSelectedNotes = new ArrayList<>();
-        mTempSelectedNotes = new ArrayList<>();
-
-        mActionModeCallBack = new ActionMode.Callback() {
+        final ActionMode.Callback actionModeCallBack = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode _mode, Menu _menu) {
+
+                if (!isSearchViewOpened) {
+                    mBinding.floatingActionButton.hide();
+                    mBinding.view.setVisibility(View.GONE);
+                }
+
+                mSelectedNotes = new ArrayList<>();
+                mTempSelectedNotes = new ArrayList<>();
+
                 _mode.getMenuInflater().inflate(R.menu.menu_selected, _menu);
                 mSelectedMenu = _menu;
+
                 return true;
             }
 
@@ -416,31 +436,10 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         return true;
                     case R.id.mi_share:
 
-                        final StringBuilder stringBuilder = new StringBuilder();
-
-                        for (int i = 0; i < mNoteAdapter.getSelectedItems().size(); i++) {
-
-                            final int index = mNoteAdapter.getSelectedItems().get(i);
-
-                            stringBuilder.append(mNoteList.get(index).getFormattedDate());
-                            stringBuilder.append(" - ");
-                            stringBuilder.append(mNoteList.get(index).getFormattedTime());
-                            stringBuilder.append("\n");
-                            stringBuilder.append(mNoteList.get(index).getBody());
-
-                            if (i != mNoteAdapter.getSelectedItems().size() - 1)
-                                stringBuilder.append("\n\n**********\n\n");
-                        }
-
-                        final Intent shareNoteIntent = new Intent(android.content.Intent.ACTION_SEND);
-                        shareNoteIntent.setType("text/plain");
-                        shareNoteIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, mMainActivity.getResources().getString(R.string.s_share_notes));
-                        shareNoteIntent.putExtra(android.content.Intent.EXTRA_TEXT, stringBuilder.toString());
-
-                        if (shareNoteIntent.resolveActivity(mMainActivity.getPackageManager()) != null)
-                            startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_notes)));
+                        if (isSearchViewOpened)
+                            shareNotes(mNoteAdapter, mFilteredList);
                         else
-                            Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
+                            shareNotes(mNoteAdapter, mNoteList);
 
                         _mode.finish();
 
@@ -449,10 +448,18 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                         if (!isAllItemsSelected) {
 
-                            mNoteAdapter.selectAllItems(mNoteList);
-
                             mTempSelectedNotes = mSelectedNotes;
-                            mSelectedNotes = new ArrayList<>(mNoteList);
+
+                            if (isSearchViewOpened) {
+
+                                mNoteAdapter.selectAllItems(mFilteredList);
+                                mSelectedNotes = new ArrayList<>(mFilteredList);
+
+                            } else {
+
+                                mNoteAdapter.selectAllItems(mNoteList);
+                                mSelectedNotes = new ArrayList<>(mNoteList);
+                            }
 
                             mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
                             mActionMode.invalidate();
@@ -462,7 +469,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         } else {
 
                             mNoteAdapter.deselectAllItems();
-
                             mSelectedNotes = mTempSelectedNotes;
 
                             mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
@@ -483,10 +489,119 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 mTempSelectedNotes.clear();
                 mNoteAdapter.clearSelection();
                 mActionMode = null;
-                mBinding.floatingActionButton.show();
+
+                if (!isSearchViewOpened) {
+                    mBinding.view.setVisibility(View.VISIBLE);
+                    mBinding.floatingActionButton.show();
+                }
             }
         };
 
-        mActionMode = mMainActivity.startSupportActionMode(mActionModeCallBack);
+        mActionMode = mMainActivity.startSupportActionMode(actionModeCallBack);
+    }
+
+    private void shareNotes(NoteAdapter _noteAdapter, List<Note> _noteList) {
+
+        final StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < _noteAdapter.getSelectedItems().size(); i++) {
+
+            final int index = _noteAdapter.getSelectedItems().get(i);
+
+            stringBuilder.append(_noteList.get(index).getFormattedDate());
+            stringBuilder.append(" - ");
+            stringBuilder.append(_noteList.get(index).getFormattedTime());
+            stringBuilder.append("\n");
+            stringBuilder.append(_noteList.get(index).getBody());
+
+            if (i != _noteAdapter.getSelectedItems().size() - 1)
+                stringBuilder.append("\n\n**********\n\n");
+        }
+
+        final Intent shareNoteIntent = new Intent(android.content.Intent.ACTION_SEND);
+        shareNoteIntent.setType("text/plain");
+        shareNoteIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, mMainActivity.getResources().getString(R.string.s_share_notes));
+        shareNoteIntent.putExtra(android.content.Intent.EXTRA_TEXT, stringBuilder.toString());
+
+        if (shareNoteIntent.resolveActivity(mMainActivity.getPackageManager()) != null)
+            startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_notes)));
+        else
+            Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private boolean         isSearchViewOpened;
+    private List<Note>      mFilteredList;
+
+    @Override
+    public void onCreateOptionsMenu(Menu _menu, MenuInflater _inflater) {
+        _inflater.inflate(R.menu.menu_list, _menu);
+
+        final MenuItem menuItem = _menu.findItem(R.id.mi_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
+
+        final int id = android.support.v7.appcompat.R.id.search_button;
+        final ImageView imageView = (ImageView) searchView.findViewById(id);
+        imageView.setImageResource(R.drawable.ic_search);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String _query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String _query) {
+
+                filterList(mNoteList, _query, mFilteredList);
+                mNoteAdapter.animateTo(mFilteredList);
+                mBinding.rvNotes.scrollToPosition(0);
+
+                return true;
+            }
+        });
+
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                isSearchViewOpened = true;
+
+                mBinding.floatingActionButton.hide();
+                mBinding.view.setVisibility(View.GONE);
+
+                mFilteredList = new ArrayList<>();
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+
+                mFilteredList.clear();
+
+                mBinding.view.setVisibility(View.VISIBLE);
+                mBinding.floatingActionButton.show();
+
+                isSearchViewOpened = false;
+
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(_menu, _inflater);
+    }
+
+    private void filterList(List<Note> _noteList, String _query, List<Note> _filteredList) {
+        _query = _query.toLowerCase();
+
+        _filteredList.clear();
+        for (Note note : _noteList) {
+            final String noteBody = note.getBody().toLowerCase();
+            final String noteDate = note.getFormattedDate().toLowerCase();
+            if (noteBody.contains(_query) || noteDate.contains(_query))
+                _filteredList.add(note);
+        }
     }
 }

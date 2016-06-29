@@ -8,29 +8,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String      DATABASE_NAME = "notes_database.db";
     public static final int         DATABASE_VERSION = 1;
-
     public static final String      DATABASE_TABLE = "notes_table";
 
-    public static final String      KEY_ID  = "_id";
+    public static final String      COLUMN_DATABASE_ID = "_id";
     public static final String      COLUMN_NOTE_ID = "note_id";
     public static final String      COLUMN_NOTE_BODY = "note_body";
 
-    public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    public static final String      CREATE_TABLE = "create table";
+    public static final String      INTEGER_PRIMARY_KEY = "integer primary key autoincrement";
+    public static final String      INTEGER = "integer";
+    public static final String      TEXT = "text not null";
+
+    public static final String      COMMA = ",";
+    public static final String      SPACE = " ";
+    public static final String      PARENTHESES_IN = "(";
+    public static final String      PARENTHESES_OUT = ")";
+
+    public DatabaseHelper(Context _context) {
+        super(_context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
-    public void onCreate(SQLiteDatabase _sqLiteDatabase) {
-        _sqLiteDatabase.execSQL("create table " + DATABASE_TABLE + " " +
-                "(" +
-                KEY_ID + " integer primary key autoincrement, " +
-                COLUMN_NOTE_ID + " integer, " +
-                COLUMN_NOTE_BODY + " text not null" +
-                ")");
+    public void onCreate(SQLiteDatabase _db) {
+        _db.execSQL(
+                CREATE_TABLE + SPACE + DATABASE_TABLE + SPACE +
+                PARENTHESES_IN +
+                COLUMN_DATABASE_ID + SPACE + INTEGER_PRIMARY_KEY + COMMA + SPACE +
+                COLUMN_NOTE_ID + SPACE + INTEGER + COMMA + SPACE +
+                COLUMN_NOTE_BODY + SPACE + TEXT +
+                PARENTHESES_OUT
+        );
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(SQLiteDatabase _db, int _oldVersion, int _newVersion) {
 
     }
 }

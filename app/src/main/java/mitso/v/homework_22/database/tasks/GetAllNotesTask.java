@@ -3,6 +3,7 @@ package mitso.v.homework_22.database.tasks;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +21,12 @@ public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
         void onFailure(Throwable _error);
     }
 
-    private DatabaseHelper mDatabaseHelper;
+    private DatabaseHelper      mDatabaseHelper;
     private List<Note>          mNoteList;
     private Callback            mCallback;
     private Exception           mException;
+    private SQLiteDatabase      mSQLiteDatabase;
+    private Cursor              mCursor;
 
     public GetAllNotesTask(DatabaseHelper mDatabaseHelper) {
         this.mDatabaseHelper = mDatabaseHelper;
@@ -39,36 +42,43 @@ public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
     }
 
     @Override
-    protected List<Note> doInBackground(Void... _voids) {
+    protected List<Note> doInBackground(Void ... _params) {
 
         try {
 
-            final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+            mSQLiteDatabase = mDatabaseHelper.getWritableDatabase();
 
             final String[] projection = {
                     DatabaseHelper.COLUMN_NOTE_ID, DatabaseHelper.COLUMN_NOTE_BODY
             };
 
-            final Cursor cursor = db.query(DatabaseHelper.DATABASE_TABLE, projection,
+            mCursor = mSQLiteDatabase.query(DatabaseHelper.DATABASE_TABLE, projection,
                     null, null, null, null, null);
 
-            while (cursor.moveToNext()) {
+            while (mCursor.moveToNext()) {
 
-                final long id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_NOTE_ID));
-                final String body = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_NOTE_BODY));
+                final long id = mCursor.getLong(mCursor.getColumnIndex(DatabaseHelper.COLUMN_NOTE_ID));
+                final String body = mCursor.getString(mCursor.getColumnIndex(DatabaseHelper.COLUMN_NOTE_BODY));
 
                 final Note note = new Note(id, body);
 
                 mNoteList.add(note);
             }
 
-            cursor.close();
-            db.close();
-
         } catch (Exception _error) {
 
             _error.printStackTrace();
             mException = _error;
+
+        } finally {
+
+            if (mCursor != null && !mCursor.isClosed())
+                mCursor.close();
+
+            if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
+                mSQLiteDatabase.close();
+
+            Log.i(LOG_TAG, "ALL NOTES ARE GOTTEN FROM DATABASE.");
         }
 
         return null;
