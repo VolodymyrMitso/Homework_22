@@ -305,7 +305,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private ActionMode              mActionMode;
 
-    private boolean                 isAllItemsSelected;
+    private boolean                 areAllItemsSelected;
     private Menu                    mSelectedMenu;
 
     private List<Note>              mSelectedNotes;
@@ -377,17 +377,45 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         if (isSearchViewOpened) {
 
-            if (mSelectedNotes.contains(mFilteredList.get(_position)))
+            if (mSelectedNotes.contains(mFilteredList.get(_position))) {
                 mSelectedNotes.remove(mFilteredList.get(_position));
-            else
+                if (areAllItemsSelected)
+                    mTempSelectedNotes = new ArrayList<>(mSelectedNotes);
+                else
+                    mTempSelectedNotes.remove(mFilteredList.get(_position));
+            } else {
                 mSelectedNotes.add(mFilteredList.get(_position));
+                mTempSelectedNotes.add(mFilteredList.get(_position));
+            }
+
+            if (mFilteredList.size() != mSelectedNotes.size()) {
+                mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_empty));
+                areAllItemsSelected = false;
+            } else {
+                mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_filled));
+                areAllItemsSelected = true;
+            }
 
         } else {
 
-            if (mSelectedNotes.contains(mNoteList.get(_position)))
+            if (mSelectedNotes.contains(mNoteList.get(_position))) {
                 mSelectedNotes.remove(mNoteList.get(_position));
-            else
+                if (areAllItemsSelected)
+                    mTempSelectedNotes = new ArrayList<>(mSelectedNotes);
+                else
+                    mTempSelectedNotes.remove(mNoteList.get(_position));
+            } else {
                 mSelectedNotes.add(mNoteList.get(_position));
+                mTempSelectedNotes.add(mNoteList.get(_position));
+            }
+
+            if (mNoteList.size() != mSelectedNotes.size()) {
+                mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_empty));
+                areAllItemsSelected = false;
+            } else {
+                mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_filled));
+                areAllItemsSelected = true;
+            }
         }
 
         mNoteAdapter.toggleSelection(_position);
@@ -409,7 +437,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                 if (!isSearchViewOpened) {
                     mBinding.floatingActionButton.hide();
-                    mBinding.rvNotes.setPadding(0,0,0,0);
+                    mBinding.rvNotes.setPadding(0, 0, 0, 0);
                 }
 
                 mSelectedNotes = new ArrayList<>();
@@ -446,9 +474,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         return true;
                     case R.id.mi_select_all:
 
-                        if (!isAllItemsSelected) {
-
-                            mTempSelectedNotes = mSelectedNotes;
+                        if (!areAllItemsSelected) {
 
                             if (isSearchViewOpened) {
 
@@ -463,18 +489,20 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                             mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
                             mActionMode.invalidate();
+
                             mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_filled));
-                            isAllItemsSelected = true;
+                            areAllItemsSelected = true;
 
                         } else {
 
                             mNoteAdapter.deselectAllItems();
-                            mSelectedNotes = mTempSelectedNotes;
+                            mSelectedNotes = new ArrayList<>(mTempSelectedNotes);
 
                             mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
                             mActionMode.invalidate();
+
                             mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_all_empty));
-                            isAllItemsSelected = false;
+                            areAllItemsSelected = false;
                         }
 
                         return true;
@@ -491,7 +519,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 mActionMode = null;
 
                 if (!isSearchViewOpened) {
-                    mBinding.rvNotes.setPadding(0,0,0,mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
+                    mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
                     mBinding.floatingActionButton.show();
                 }
             }
@@ -569,7 +597,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 isSearchViewOpened = true;
 
                 mBinding.floatingActionButton.hide();
-                mBinding.rvNotes.setPadding(0,0,0,0);
+                mBinding.rvNotes.setPadding(0, 0, 0, 0);
 
                 mFilteredList = new ArrayList<>();
             }
@@ -581,7 +609,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                 mFilteredList.clear();
 
-                mBinding.rvNotes.setPadding(0,0,0,mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
+                mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
                 mBinding.floatingActionButton.show();
 
                 isSearchViewOpened = false;
