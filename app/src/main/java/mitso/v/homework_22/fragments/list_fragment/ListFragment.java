@@ -409,7 +409,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                 if (!isSearchViewOpened) {
                     mBinding.floatingActionButton.hide();
-                    mBinding.view.setVisibility(View.GONE);
+                    mBinding.rvNotes.setPadding(0,0,0,0);
                 }
 
                 mSelectedNotes = new ArrayList<>();
@@ -491,7 +491,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 mActionMode = null;
 
                 if (!isSearchViewOpened) {
-                    mBinding.view.setVisibility(View.VISIBLE);
+                    mBinding.rvNotes.setPadding(0,0,0,mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
                     mBinding.floatingActionButton.show();
                 }
             }
@@ -569,7 +569,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 isSearchViewOpened = true;
 
                 mBinding.floatingActionButton.hide();
-                mBinding.view.setVisibility(View.GONE);
+                mBinding.rvNotes.setPadding(0,0,0,0);
 
                 mFilteredList = new ArrayList<>();
             }
@@ -581,7 +581,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                 mFilteredList.clear();
 
-                mBinding.view.setVisibility(View.VISIBLE);
+                mBinding.rvNotes.setPadding(0,0,0,mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
                 mBinding.floatingActionButton.show();
 
                 isSearchViewOpened = false;

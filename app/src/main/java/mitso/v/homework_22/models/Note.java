@@ -15,7 +15,7 @@ public class Note implements Serializable, Comparable<Note> {
     private String      mFormattedDate;
 
     public Note(String _body, Date _date) {
-        this.mId = Long.parseLong(new SimpleDateFormat("ddMMyyyyHHmmssSSS").format(_date));
+        this.mId = Long.parseLong(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(_date));
         this.mBody = _body;
         this.mDate = _date;
         this.mFormattedDate = new SimpleDateFormat("dd MMMM yyyy").format(_date);
@@ -25,7 +25,7 @@ public class Note implements Serializable, Comparable<Note> {
         this.mId = _id;
         this.mBody = _body;
         try {
-            this.mDate = new SimpleDateFormat("ddMMyyyyHHmmssSSS").parse(String.valueOf(_id));
+            this.mDate = new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(String.valueOf(_id));
             this.mFormattedDate = new SimpleDateFormat("dd MMMM yyyy").format(mDate);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -78,7 +78,7 @@ public class Note implements Serializable, Comparable<Note> {
     }
 
     public String getFormattedTime() {
-        return new SimpleDateFormat("HH:mm:ss").format(mDate);
+        return new SimpleDateFormat("HH:mm").format(mDate);
     }
 
 }

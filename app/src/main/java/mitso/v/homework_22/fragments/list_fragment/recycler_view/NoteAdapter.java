@@ -43,28 +43,46 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
 
         final Note note = mNoteList.get(_position);
 
-        _holder.getBinding().setNote(note);
 
-        _holder.getBinding().setClickerOpenNote(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNoteHandler.onClick(note, _holder.getAdapterPosition());
-            }
-        });
 
-        _holder.getBinding().setClickerSelectNote(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                mNoteHandler.onLongClick(note, _holder.getAdapterPosition());
+            _holder.getBinding().setNote(note);
 
-                return true;
-            }
-        });
+            _holder.getBinding().setClickerOpenNote(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mNoteHandler.onClick(note, _holder.getAdapterPosition());
+                }
+            });
 
-        /** highlight selected item: */
-        final Drawable selectedShape = mContext.getResources().getDrawable(R.drawable.shape_card_selected);
-        final Drawable defaultShape = mContext.getResources().getDrawable(R.drawable.shape_card_default);
-        _holder.getBinding().cardNote.setBackgroundDrawable(isSelected(_position) ? selectedShape : defaultShape);
+            _holder.getBinding().setClickerSelectNote(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    mNoteHandler.onLongClick(note, _holder.getAdapterPosition());
+
+                    return true;
+                }
+            });
+
+//        final LinearLayout.LayoutParams lastItemLayoutParams =
+//                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//        lastItemLayoutParams.setMargins(0, 0, 0, mContext.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
+//
+//        final LinearLayout.LayoutParams allItemLayoutParams =
+//                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//        allItemLayoutParams.setMargins(0, 0, 0, 0);
+//
+//        if (getSelectedItemCount() == 0) {
+//            if (!isSelected(_position) && _position == mNoteList.size() - 1)
+//                _holder.getBinding().cardNote.setLayoutParams(lastItemLayoutParams);
+//            else
+//                _holder.getBinding().cardNote.setLayoutParams(allItemLayoutParams);
+//        }
+
+            /** highlight selected item: */
+            final Drawable selectedShape = mContext.getResources().getDrawable(R.drawable.shape_card_selected);
+            final Drawable defaultShape = mContext.getResources().getDrawable(R.drawable.shape_card_default);
+            _holder.getBinding().cardNote.setBackgroundDrawable(isSelected(_position) ? selectedShape : defaultShape);
+
     }
 
     public void removeNotes(List<Integer> _positions) {

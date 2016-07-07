@@ -31,11 +31,11 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:maxLines="2"
             android:text="@{note.body}"
             android:textColor="@color/c_card_text"
             android:textSize="@dimen/d_text_14sp"
-            tools:text="note body"
-            android:maxLines="2"/>
+            tools:text="note body" />
 
         <TextView
             android:layout_width="match_parent"
