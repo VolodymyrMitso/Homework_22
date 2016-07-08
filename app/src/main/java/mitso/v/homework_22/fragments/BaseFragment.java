@@ -14,4 +14,8 @@ public class BaseFragment extends Fragment {
         super.onAttach(context);
         mMainActivity = (MainActivity) context;
     }
+
+    public void onBackPressed() {
+
+    }
 }

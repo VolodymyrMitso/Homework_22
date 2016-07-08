@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.view.ContextThemeWrapper;
 import android.text.Html;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.Date;
@@ -51,49 +51,20 @@ public class CreateEditFragment extends BaseFragment {
         setHasOptionsMenu(true);
         initActionBar();
 
+        if (!isNoteNotNull)
+            showKeyboardAndSetFocus(mBinding.etCreateEditNote);
+
         return rootView;
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onBackPressed() {
+        super.onBackPressed();
 
-         initBackButton();
-    }
+        Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
+        Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
-
-
-    private void initBackButton() {
-
-        mBinding.etCreateEditNote.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK)
-                    mBinding.etCreateEditNote.clearFocus();
-
-                return false;
-            }
-        });
-
-        if (getView() != null) {
-            getView().setFocusableInTouchMode(true);
-            getView().requestFocus();
-            getView().setOnKeyListener(new View.OnKeyListener() {
-                @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
-
-                        Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
-                        Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
-
-                        mMainActivity.commitFragment(new ListFragment());
-
-                        return true;
-                    }
-                    return false;
-                }
-            });
-        }
+        mMainActivity.commitFragment(new ListFragment());
     }
 
     private void initActionBar() {
@@ -130,8 +101,6 @@ public class CreateEditFragment extends BaseFragment {
                 Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
                 Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
-                hideKeyboard();
-
                 mMainActivity.commitFragment(new ListFragment());
 
                 return true;
@@ -148,7 +117,9 @@ public class CreateEditFragment extends BaseFragment {
                         startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_note)));
                     else
                         Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
-                }
+
+                } else
+                    Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_empty_note), Toast.LENGTH_LONG).show();
 
                 return true;
             case R.id.mi_save:
@@ -173,8 +144,6 @@ public class CreateEditFragment extends BaseFragment {
                 } else
                     Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
 
-                hideKeyboard();
-
                 mMainActivity.commitFragment(listFragment);
 
                 return true;
@@ -191,6 +160,21 @@ public class CreateEditFragment extends BaseFragment {
                     (InputMethodManager) mMainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    private void showKeyboardAndSetFocus(EditText _editText) {
+
+        _editText.requestFocus();
+        final InputMethodManager inputMethodManager =
+                (InputMethodManager) mMainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED,InputMethodManager.HIDE_IMPLICIT_ONLY);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        hideKeyboard();
     }
 
     private void receiveNote() {

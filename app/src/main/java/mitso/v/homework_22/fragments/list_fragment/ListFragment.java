@@ -521,7 +521,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 if (!isSearchViewOpened) {
                     mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
                     mBinding.floatingActionButton.show();
-                }
+                } else
+                    mSearchView.setQuery("", true);
             }
         };
 
@@ -561,19 +562,20 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private boolean         isSearchViewOpened;
     private List<Note>      mFilteredList;
+    private SearchView      mSearchView;
 
     @Override
     public void onCreateOptionsMenu(Menu _menu, MenuInflater _inflater) {
         _inflater.inflate(R.menu.menu_list, _menu);
 
         final MenuItem menuItem = _menu.findItem(R.id.mi_search);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(menuItem);
 
         final int id = android.support.v7.appcompat.R.id.search_button;
-        final ImageView imageView = (ImageView) searchView.findViewById(id);
+        final ImageView imageView = (ImageView) mSearchView.findViewById(id);
         imageView.setImageResource(R.drawable.ic_search);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String _query) {
                 return false;
@@ -582,15 +584,17 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public boolean onQueryTextChange(String _query) {
 
-                filterList(mNoteList, _query, mFilteredList);
-                mNoteAdapter.animateTo(mFilteredList);
-                mBinding.rvNotes.scrollToPosition(0);
+                if (mNoteList != null && !mNoteList.isEmpty()) {
+                    filterList(mNoteList, _query, mFilteredList);
+                    mNoteAdapter.animateTo(mFilteredList);
+                    mBinding.rvNotes.scrollToPosition(0);
+                }
 
                 return true;
             }
         });
 
-        searchView.setOnSearchClickListener(new View.OnClickListener() {
+        mSearchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -603,7 +607,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             }
         });
 
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
 
@@ -631,5 +635,17 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             if (noteBody.contains(_query) || noteDate.contains(_query))
                 _filteredList.add(note);
         }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (isSearchViewOpened && !mSearchView.getQuery().toString().isEmpty())
+            mSearchView.setQuery("", true);
+        else
+            mMainActivity.finish();
     }
 }

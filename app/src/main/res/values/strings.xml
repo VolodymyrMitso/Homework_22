@@ -14,4 +14,5 @@
     <string name="s_save_note">Save note</string>
 
     <string name="s_no_program">You do not have right program for this action.</string>
+    <string name="s_empty_note">Note is empty.</string>
 </resources>
