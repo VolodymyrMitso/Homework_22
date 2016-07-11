@@ -3,10 +3,11 @@ package mitso.v.homework_22.fragments.list_fragment;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.SearchView;
 import android.text.Html;
 import android.util.Log;
@@ -52,8 +53,12 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private boolean                 isNewNoteNotNull;
     private boolean                 isOldNoteNotNull;
 
-    private DatabaseHelper          mDatabaseHelper;
+    private Parcelable              mState;
 
+    private CreateEditFragment mCreateEditFragment;
+    private Bundle                  mBundle;
+
+    private DatabaseHelper          mDatabaseHelper;
 
     @Nullable
     @Override
@@ -82,6 +87,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         }
 
         initButtons();
+        initFragmentAndBundle();
 
         return rootView;
     }
@@ -113,6 +119,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 mDatabaseHelper.close();
 
                 mNoteList = _result;
+
+                if (mNoteList.isEmpty())
+                    Log.i(LOG_TAG, "DATABASE IS EMPTY.");
 
                 addNoteToList();
                 if (isNewNoteNotNull)
@@ -206,11 +215,10 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onClick(View v) {
 
-                if (mActionMode != null)
-                    mActionMode.finish();
-
                 releaseHandler();
-                mMainActivity.commitFragment(new CreateEditFragment());
+
+                mBundle.putParcelable(Constants.RV_STATE_BUNDLE_IN_KEY, mBinding.rvNotes.getLayoutManager().onSaveInstanceState());
+                mMainActivity.commitFragment(mCreateEditFragment, mBundle);
             }
         });
     }
@@ -253,20 +261,51 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         }
     }
 
+    private void receiveState() {
+
+        try {
+            mState = getArguments().getParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY);
+            if (mState == null)
+                throw new NullPointerException();
+
+            Log.i(LOG_TAG, "STATE IS RECEIVED.");
+
+        } catch (NullPointerException _error) {
+
+            Log.i(LOG_TAG, "STATE IS NOT RECEIVED. STATE IS NULL.");
+        }
+    }
+
+    private void initFragmentAndBundle() {
+        mCreateEditFragment = new CreateEditFragment();
+        mBundle = new Bundle();
+    }
+
     private void initRecyclerView() {
 
-        Collections.sort(mNoteList);
+        if (mNoteList.isEmpty()) {
 
-        mNoteAdapter = new NoteAdapter(mMainActivity, mNoteList);
-        final int spacingInPixels = mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_10dp);
+            Log.i(LOG_TAG, "LIST IS EMPTY.");
 
-        mBinding.rvNotes.setAdapter(mNoteAdapter);
-        mBinding.rvNotes.setLayoutManager(new GridLayoutManager(mMainActivity, 1));
-        mBinding.rvNotes.addItemDecoration(new SpacingDecoration(spacingInPixels));
+        } else {
 
-        Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
+            Collections.sort(mNoteList);
 
-        setHandler();
+            mNoteAdapter = new NoteAdapter(mMainActivity, mNoteList);
+            final int spacingInPixels = mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_10dp);
+
+            mBinding.rvNotes.setAdapter(mNoteAdapter);
+            mBinding.rvNotes.setLayoutManager(new LinearLayoutManager(mMainActivity));
+            mBinding.rvNotes.addItemDecoration(new SpacingDecoration(spacingInPixels));
+
+            Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
+
+            receiveState();
+            if (mState != null)
+                mBinding.rvNotes.getLayoutManager().onRestoreInstanceState(mState);
+
+            setHandler();
+        }
     }
 
     @Override
@@ -355,12 +394,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
             releaseHandler();
 
-            final CreateEditFragment createEditFragment = new CreateEditFragment();
-            final Bundle bundle = new Bundle();
-            bundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
-            createEditFragment.setArguments(bundle);
-
-            mMainActivity.commitFragment(createEditFragment);
+            mBundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
+            mBundle.putParcelable(Constants.RV_STATE_BUNDLE_IN_KEY, mBinding.rvNotes.getLayoutManager().onSaveInstanceState());
+            mMainActivity.commitFragment(mCreateEditFragment, mBundle);
         }
     }
 

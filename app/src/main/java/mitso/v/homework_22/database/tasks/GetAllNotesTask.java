@@ -3,7 +3,6 @@ package mitso.v.homework_22.database.tasks;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,8 +76,6 @@ public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
 
             if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
                 mSQLiteDatabase.close();
-
-            Log.i(LOG_TAG, "ALL NOTES ARE GOTTEN FROM DATABASE.");
         }
 
         return null;

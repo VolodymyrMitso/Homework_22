@@ -19,10 +19,12 @@ public class MainActivity extends AppCompatActivity {
 
         DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        commitFragment(new ListFragment());
+        commitFragment(new ListFragment(), null);
     }
 
-    public void commitFragment(BaseFragment _baseFragment) {
+    public void commitFragment(BaseFragment _baseFragment, Bundle _bundle) {
+
+        _baseFragment.setArguments(_bundle);
 
         getSupportFragmentManager()
                 .beginTransaction()

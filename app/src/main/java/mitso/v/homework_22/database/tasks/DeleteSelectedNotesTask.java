@@ -2,7 +2,6 @@ package mitso.v.homework_22.database.tasks;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.util.List;
 
@@ -62,8 +61,6 @@ public class DeleteSelectedNotesTask extends AsyncTask<Void, Void, Void> {
 
             if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
                 mSQLiteDatabase.close();
-
-            Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM DATABASE.");
         }
 
         return null;

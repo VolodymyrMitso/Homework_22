@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.view.ContextThemeWrapper;
 import android.text.Html;
@@ -36,6 +37,11 @@ public class CreateEditFragment extends BaseFragment {
     private Note                        mNote;
     private boolean                     isNoteNotNull;
 
+    private Parcelable                  mState;
+
+    private ListFragment                mListFragment;
+    private Bundle                      mBundle;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater _inflater, @Nullable ViewGroup _container, @Nullable Bundle _savedInstanceState) {
@@ -47,12 +53,15 @@ public class CreateEditFragment extends BaseFragment {
         final View rootView = mBinding.getRoot();
 
         receiveNote();
+        receiveState();
 
         setHasOptionsMenu(true);
         initActionBar();
 
         if (!isNoteNotNull)
             showKeyboardAndSetFocus(mBinding.etCreateEditNote);
+
+        initFragmentAndBundle();
 
         return rootView;
     }
@@ -64,7 +73,8 @@ public class CreateEditFragment extends BaseFragment {
         Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
         Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
-        mMainActivity.commitFragment(new ListFragment());
+        mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
+        mMainActivity.commitFragment(mListFragment, mBundle);
     }
 
     private void initActionBar() {
@@ -101,7 +111,8 @@ public class CreateEditFragment extends BaseFragment {
                 Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
                 Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
-                mMainActivity.commitFragment(new ListFragment());
+                mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
+                mMainActivity.commitFragment(mListFragment, mBundle);
 
                 return true;
             case R.id.mi_share:
@@ -124,27 +135,26 @@ public class CreateEditFragment extends BaseFragment {
                 return true;
             case R.id.mi_save:
 
-                final ListFragment listFragment = new ListFragment();
-
                 if (!mBinding.etCreateEditNote.getText().toString().isEmpty()) {
 
                     final Note note = new Note(mBinding.etCreateEditNote.getText().toString(), new Date());
-                    final Bundle bundle = new Bundle();
-                    bundle.putSerializable(Constants.NOTE_BUNDLE_OUT_KEY, note);
 
+                    mBundle.putSerializable(Constants.NOTE_BUNDLE_OUT_KEY, note);
                     Log.i(LOG_TAG, "NEW NOTE IS SENT.");
 
-                    if (isNoteNotNull) {
-                        bundle.putSerializable(Constants.OLD_NOTE_BUNDLE_KEY, mNote);
-                        Log.i(LOG_TAG, "OLD NOTE IS SENT.");
-                    } else
-                        Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
-
-                    listFragment.setArguments(bundle);
                 } else
                     Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
 
-                mMainActivity.commitFragment(listFragment);
+                if (isNoteNotNull) {
+
+                    mBundle.putSerializable(Constants.OLD_NOTE_BUNDLE_KEY, mNote);
+                    Log.i(LOG_TAG, "OLD NOTE IS SENT.");
+
+                } else
+                    Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
+
+                mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
+                mMainActivity.commitFragment(mListFragment, mBundle);
 
                 return true;
             default:
@@ -193,5 +203,26 @@ public class CreateEditFragment extends BaseFragment {
             isNoteNotNull = false;
             Log.i(LOG_TAG, "NOTE IS NOT RECEIVED. NOTE IS NULL.");
         }
+    }
+
+    private void receiveState() {
+
+        try {
+            mState = getArguments().getParcelable(Constants.RV_STATE_BUNDLE_IN_KEY);
+            if (mState == null)
+                throw new NullPointerException();
+
+            Log.i(LOG_TAG, "STATE IS RECEIVED.");
+
+        } catch (NullPointerException _error) {
+
+            Log.i(LOG_TAG, "STATE IS NOT RECEIVED. STATE IS NULL.");
+        }
+    }
+
+    private void initFragmentAndBundle() {
+
+        mListFragment = new ListFragment();
+        mBundle = new Bundle();
     }
 }

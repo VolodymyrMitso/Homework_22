@@ -2,7 +2,6 @@ package mitso.v.homework_22.database.tasks;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
@@ -55,8 +54,6 @@ public class DeleteOldNoteTask extends AsyncTask<Void, Void, Void> {
 
             if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
                 mSQLiteDatabase.close();
-
-            Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM DATABASE.");
         }
 
         return null;

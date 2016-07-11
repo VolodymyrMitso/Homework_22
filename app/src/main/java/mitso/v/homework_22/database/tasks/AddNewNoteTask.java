@@ -3,7 +3,6 @@ package mitso.v.homework_22.database.tasks;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
@@ -58,8 +57,6 @@ public class AddNewNoteTask extends AsyncTask<Void, Void, Void> {
 
             if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
                 mSQLiteDatabase.close();
-
-            Log.i(LOG_TAG, "NEW NOTE IS ADDED TO DATABASE.");
         }
 
         return null;

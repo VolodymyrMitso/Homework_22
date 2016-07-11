@@ -10,9 +10,9 @@ public class BaseFragment extends Fragment {
     protected MainActivity      mMainActivity;
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mMainActivity = (MainActivity) context;
+    public void onAttach(Context _context) {
+        super.onAttach(_context);
+        mMainActivity = (MainActivity) _context;
     }
 
     public void onBackPressed() {
