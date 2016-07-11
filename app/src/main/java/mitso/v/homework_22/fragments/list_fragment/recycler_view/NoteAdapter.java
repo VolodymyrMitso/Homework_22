@@ -27,8 +27,6 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
 
     public NoteAdapter(Context _context, List<Note> _noteList) {
         this.mContext = _context;
-
-        /** !!! */
         this.mNoteList = new ArrayList<>(_noteList);
     }
 
@@ -42,51 +40,70 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
     public void onBindViewHolder(final NoteViewHolder _holder, final int _position) {
 
         final Note note = mNoteList.get(_position);
+        _holder.getBinding().setNote(note);
 
+        _holder.getBinding().setClickerOpenNote(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNoteHandler.onClick(note, _holder.getAdapterPosition());
+            }
+        });
 
+        _holder.getBinding().setClickerSelectNote(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mNoteHandler.onLongClick(note, _holder.getAdapterPosition());
+                return true;
+            }
+        });
 
-            _holder.getBinding().setNote(note);
-
-            _holder.getBinding().setClickerOpenNote(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mNoteHandler.onClick(note, _holder.getAdapterPosition());
-                }
-            });
-
-            _holder.getBinding().setClickerSelectNote(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    mNoteHandler.onLongClick(note, _holder.getAdapterPosition());
-
-                    return true;
-                }
-            });
-
-//        final LinearLayout.LayoutParams lastItemLayoutParams =
-//                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//        lastItemLayoutParams.setMargins(0, 0, 0, mContext.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
-//
-//        final LinearLayout.LayoutParams allItemLayoutParams =
-//                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//        allItemLayoutParams.setMargins(0, 0, 0, 0);
-//
-//        if (getSelectedItemCount() == 0) {
-//            if (!isSelected(_position) && _position == mNoteList.size() - 1)
-//                _holder.getBinding().cardNote.setLayoutParams(lastItemLayoutParams);
-//            else
-//                _holder.getBinding().cardNote.setLayoutParams(allItemLayoutParams);
-//        }
-
-            /** highlight selected item: */
-            final Drawable selectedShape = mContext.getResources().getDrawable(R.drawable.shape_card_selected);
-            final Drawable defaultShape = mContext.getResources().getDrawable(R.drawable.shape_card_default);
-            _holder.getBinding().cardNote.setBackgroundDrawable(isSelected(_position) ? selectedShape : defaultShape);
+        final Drawable selectedShape = mContext.getResources().getDrawable(R.drawable.shape_card_selected);
+        final Drawable defaultShape = mContext.getResources().getDrawable(R.drawable.shape_card_default);
+        _holder.getBinding().cardNote.setBackgroundDrawable(isSelected(_position) ? selectedShape : defaultShape);
 
     }
 
+    @Override
+    public int getItemCount() {
+        return mNoteList.size();
+    }
+
+    public void setNoteHandler(INoteHandler _noteHandler) {
+        if (mNoteHandler == null) {
+            this.mNoteHandler = _noteHandler;
+            Log.i(LOG_TAG, "HANDLER IS SET.");
+        }
+    }
+
+    public void releaseNoteHandler() {
+        if (mNoteHandler != null) {
+            this.mNoteHandler = null;
+            Log.i(LOG_TAG, "HANDLER IS NULL.");
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void addNote(int _position, Note _note) {
+        mNoteList.add(_position, _note);
+        notifyItemInserted(_position);
+    }
+
+    private void removeNote(int _position) {
+        mNoteList.remove(_position);
+        notifyItemRemoved(_position);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void removeRange(int _positionStart, int _itemCount) {
+        for (int i = 0; i < _itemCount; ++i)
+            mNoteList.remove(_positionStart);
+
+        notifyItemRangeRemoved(_positionStart, _itemCount);
+    }
+
     public void removeNotes(List<Integer> _positions) {
-        // Reverse-sort the list
         Collections.sort(_positions, new Comparator<Integer>() {
             @Override
             public int compare(Integer _lhs, Integer _rhs) {
@@ -94,7 +111,6 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
             }
         });
 
-        // Split the list in ranges
         while (!_positions.isEmpty()) {
 
             if (_positions.size() == 1) {
@@ -122,53 +138,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM LIST.");
     }
 
-    private void removeNote(int _position) {
-        mNoteList.remove(_position);
-        notifyItemRemoved(_position);
-    }
-
-    private void removeRange(int _positionStart, int _itemCount) {
-        for (int i = 0; i < _itemCount; ++i)
-            mNoteList.remove(_positionStart);
-
-        notifyItemRangeRemoved(_positionStart, _itemCount);
-    }
-
-    @Override
-    public int getItemCount() {
-        return mNoteList.size();
-    }
-
-    public void setNoteHandler(INoteHandler _noteHandler) {
-        if (mNoteHandler == null) {
-            this.mNoteHandler = _noteHandler;
-            Log.i(LOG_TAG, "HANDLER IS SET.");
-        }
-    }
-
-    public void releaseNoteHandler() {
-        if (mNoteHandler != null) {
-            this.mNoteHandler = null;
-            Log.i(LOG_TAG, "HANDLER IS NULL.");
-        }
-    }
-
-//    /** !!! */
-//    public List<Note> getNoteList() {
-//        return mNoteList;
-//    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void removeItem(int _position) {
-        mNoteList.remove(_position);
-        notifyItemRemoved(_position);
-    }
-
-    public void addItem(int _position, Note _note) {
-        mNoteList.add(_position, _note);
-        notifyItemInserted(_position);
-    }
 
     public void moveItem(int _fromPosition, int _toPosition) {
         final Note note = mNoteList.remove(_fromPosition);
@@ -186,7 +156,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         for (int i = mNoteList.size() - 1; i >= 0; i--) {
             final Note note = mNoteList.get(i);
             if (!_newNotes.contains(note))
-                removeItem(i);
+                removeNote(i);
         }
     }
 
@@ -194,7 +164,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         for (int i = 0, count = _newNotes.size(); i < count; i++) {
             final Note note = _newNotes.get(i);
             if (!mNoteList.contains(note))
-                addItem(i, note);
+                addNote(i, note);
         }
     }
 

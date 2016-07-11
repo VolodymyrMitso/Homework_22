@@ -55,7 +55,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private Parcelable              mState;
 
-    private CreateEditFragment mCreateEditFragment;
+    private CreateEditFragment      mCreateEditFragment;
     private Bundle                  mBundle;
 
     private DatabaseHelper          mDatabaseHelper;
@@ -95,10 +95,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private void initActionBar() {
 
         if (mMainActivity.getSupportActionBar() != null) {
-
-            mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            mMainActivity.getSupportActionBar().setHomeButtonEnabled(false);
-            mMainActivity.getSupportActionBar().setDisplayShowHomeEnabled(false);
 
             mMainActivity.getSupportActionBar().setTitle(Html.fromHtml("<font color='#" +
                     Integer.toHexString(mMainActivity.getResources().getColor(R.color.c_action_bar_text)).substring(2) +
