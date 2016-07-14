@@ -14,7 +14,7 @@ import java.util.List;
 
 import mitso.v.homework_22.R;
 import mitso.v.homework_22.constants.Constants;
-import mitso.v.homework_22.databinding.NoteCardBinding;
+import mitso.v.homework_22.databinding.CardNoteBinding;
 import mitso.v.homework_22.models.Note;
 
 public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
@@ -32,8 +32,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
 
     @Override
     public NoteViewHolder onCreateViewHolder(ViewGroup _parent, int _viewType) {
-        final NoteCardBinding binding = NoteCardBinding.inflate(LayoutInflater.from(_parent.getContext()), _parent, false);
-        return new NoteViewHolder(binding.getRoot());
+        return new NoteViewHolder(CardNoteBinding.inflate(LayoutInflater.from(_parent.getContext()), _parent, false).getRoot());
     }
 
     @Override
@@ -87,21 +86,36 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
     public void addNote(int _position, Note _note) {
         mNoteList.add(_position, _note);
         notifyItemInserted(_position);
+
+        Log.i(LOG_TAG, "NOTE IS ADDED TO LIST.");
     }
 
-    private void removeNote(int _position) {
+    public void removeNote(int _position) {
         mNoteList.remove(_position);
         notifyItemRemoved(_position);
+
+        Log.i(LOG_TAG, "NOTE IS DELETED FROM LIST.");
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void removeRange(int _positionStart, int _itemCount) {
-        for (int i = 0; i < _itemCount; ++i)
-            mNoteList.remove(_positionStart);
-
-        notifyItemRangeRemoved(_positionStart, _itemCount);
+    private void addItem(int _position, Note _note) {
+        mNoteList.add(_position, _note);
+        notifyItemInserted(_position);
     }
+
+    private void removeItem(int _position) {
+        mNoteList.remove(_position);
+        notifyItemRemoved(_position);
+    }
+
+    private void moveItem(int _fromPosition, int _toPosition) {
+        final Note note = mNoteList.remove(_fromPosition);
+        mNoteList.add(_toPosition, note);
+        notifyItemMoved(_fromPosition, _toPosition);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void removeNotes(List<Integer> _positions) {
         Collections.sort(_positions, new Comparator<Integer>() {
@@ -115,7 +129,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
 
             if (_positions.size() == 1) {
 
-                removeNote(_positions.get(0));
+                removeItem(_positions.get(0));
                 _positions.remove(0);
 
             } else {
@@ -126,7 +140,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
                     ++count;
 
                 if (count == 1)
-                    removeNote(_positions.get(0));
+                    removeItem(_positions.get(0));
                 else
                     removeRange(_positions.get(count - 1), count);
 
@@ -138,13 +152,14 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM LIST.");
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    private void removeRange(int _positionStart, int _itemCount) {
+        for (int i = 0; i < _itemCount; ++i)
+            mNoteList.remove(_positionStart);
 
-    public void moveItem(int _fromPosition, int _toPosition) {
-        final Note note = mNoteList.remove(_fromPosition);
-        mNoteList.add(_toPosition, note);
-        notifyItemMoved(_fromPosition, _toPosition);
+        notifyItemRangeRemoved(_positionStart, _itemCount);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void animateTo(List<Note> _noteList) {
         applyAndAnimateRemovals(_noteList);
@@ -156,7 +171,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         for (int i = mNoteList.size() - 1; i >= 0; i--) {
             final Note note = mNoteList.get(i);
             if (!_newNotes.contains(note))
-                removeNote(i);
+                removeItem(i);
         }
     }
 
@@ -164,7 +179,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         for (int i = 0, count = _newNotes.size(); i < count; i++) {
             final Note note = _newNotes.get(i);
             if (!mNoteList.contains(note))
-                addNote(i, note);
+                addItem(i, note);
         }
     }
 

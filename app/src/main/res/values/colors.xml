@@ -9,9 +9,12 @@
     <color name="c_create_edit_accent">#000000</color>
     <color name="c_create_edit_text">#000000</color>
 
-    <color name="c_card_selected">#2196F3</color>
-    <color name="c_card_default">#CFD8DC</color>
+    <color name="c_card_selected">#CFD8DC</color>
+    <color name="c_card_default">#ffffff</color>
     <color name="c_card_text">#000000</color>
+    <color name="c_card_line">#90A4AE</color>
 
     <color name="c_floating_button">#607D8B</color>
+
+    <color name="c_background">#ffffff</color>
 </resources>

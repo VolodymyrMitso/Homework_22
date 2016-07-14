@@ -1,15 +1,14 @@
 package mitso.v.homework_22.fragments.list_fragment;
 
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.SearchView;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,14 +32,17 @@ import mitso.v.homework_22.database.tasks.GetAllNotesTask;
 import mitso.v.homework_22.databinding.FragmentListBinding;
 import mitso.v.homework_22.fragments.BaseFragment;
 import mitso.v.homework_22.fragments.create_fragment.CreateEditFragment;
+import mitso.v.homework_22.fragments.list_fragment.animator.FlipInBottomXAnimator;
 import mitso.v.homework_22.fragments.list_fragment.recycler_view.INoteHandler;
 import mitso.v.homework_22.fragments.list_fragment.recycler_view.NoteAdapter;
-import mitso.v.homework_22.fragments.list_fragment.recycler_view.SpacingDecoration;
 import mitso.v.homework_22.models.Note;
+import mitso.v.homework_22.support.Support;
 
 public class ListFragment extends BaseFragment implements INoteHandler {
 
     private String                  LOG_TAG = Constants.LIST_FRAGMENT_LOG_TAG;
+
+    private Support                 mSupport;
 
     private FragmentListBinding     mBinding;
 
@@ -50,10 +51,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private Note                    mNewNote;
     private Note                    mOldNote;
-    private boolean                 isNewNoteNotNull;
-    private boolean                 isOldNoteNotNull;
+    private boolean                 isNewNoteNull;
+    private boolean                 isOldNoteNull;
 
     private Parcelable              mState;
+    private boolean                 isRecyclerViewReady;
 
     private CreateEditFragment      mCreateEditFragment;
     private Bundle                  mBundle;
@@ -66,6 +68,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         mBinding = DataBindingUtil.inflate(_inflater, R.layout.fragment_list, _container, false);
         final View rootView = mBinding.getRoot();
+
+        mSupport = new Support();
 
         initActionBar();
         setHasOptionsMenu(true);
@@ -81,9 +85,14 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             Log.i(LOG_TAG, "DATABASE DOESN'T EXIST.");
 
             mNoteList = new ArrayList<>();
-            addNoteToList();
-            if (isNewNoteNotNull)
+
+            receiveNewNote();
+            receiveOldNote();
+
+            if (!isNewNoteNull && isOldNoteNull)        // new + null
                 addNewNoteToDatabase();
+            else                                        // null + null
+                initRecyclerView();
         }
 
         initButtons();
@@ -96,9 +105,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         if (mMainActivity.getSupportActionBar() != null) {
 
-            mMainActivity.getSupportActionBar().setTitle(Html.fromHtml("<font color='#" +
-                    Integer.toHexString(mMainActivity.getResources().getColor(R.color.c_action_bar_text)).substring(2) +
-                    "'>" + mMainActivity.getResources().getString(R.string.s_app_name) + "</font>"));
+            mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            mMainActivity.getSupportActionBar().setHomeButtonEnabled(false);
+            mMainActivity.getSupportActionBar().setDisplayShowHomeEnabled(false);
+
+            mMainActivity.getSupportActionBar().setTitle(mMainActivity.getResources().getString(R.string.s_app_name));
         }
     }
 
@@ -111,7 +122,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onSuccess(List<Note> _result) {
 
-                Log.i(getAllNotesTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(getAllNotesTask.LOG_TAG, "ALL NOTES ARE TAKEN FROM DATABASE.");
                 mDatabaseHelper.close();
 
                 mNoteList = _result;
@@ -119,10 +130,16 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 if (mNoteList.isEmpty())
                     Log.i(LOG_TAG, "DATABASE IS EMPTY.");
 
-                addNoteToList();
-                if (isNewNoteNotNull)
+                receiveNewNote();
+                receiveOldNote();
+
+                if (!isNewNoteNull && isOldNoteNull)        // new + null
                     addNewNoteToDatabase();
-                else
+                else if (isNewNoteNull && !isOldNoteNull)   // null + old
+                    deleteOldNoteFromDatabase();
+                else if (!isNewNoteNull)                    // new + old
+                    addNewNoteToDatabase();
+                else                                        // null + null
                     initRecyclerView();
 
                 getAllNotesTask.releaseCallback();
@@ -131,7 +148,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(getAllNotesTask.LOG_TAG, "ON FAILURE.");
+                Log.i(getAllNotesTask.LOG_TAG, "ERROR !!! ALL NOTES ARE NOT TAKEN FROM DATABASE !!!");
                 Log.e(getAllNotesTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
@@ -150,14 +167,13 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onSuccess() {
 
-                Log.i(addNewNoteTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(addNewNoteTask.LOG_TAG, "NEW NOTE IS ADDED TO DATABASE.");
                 mDatabaseHelper.close();
 
-                deleteNoteFromList();
-                if (isOldNoteNotNull)
-                    deleteOldNoteFromDatabase();
-                else
+                if (!isNewNoteNull && isOldNoteNull)        // new + null
                     initRecyclerView();
+                else if (!isNewNoteNull)                    // new + old
+                    deleteOldNoteFromDatabase();
 
                 addNewNoteTask.releaseCallback();
             }
@@ -165,7 +181,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(addNewNoteTask.LOG_TAG, "ON FAILURE.");
+                Log.i(addNewNoteTask.LOG_TAG, "ERROR !!! NEW NOTE IS NOT ADDED TO DATABASE !!!");
                 Log.e(addNewNoteTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
@@ -184,7 +200,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onSuccess() {
 
-                Log.i(deleteOldNoteTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(deleteOldNoteTask.LOG_TAG, "OLD NOTE IS DELETED FROM DATABASE.");
                 mDatabaseHelper.close();
 
                 initRecyclerView();
@@ -195,7 +211,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(deleteOldNoteTask.LOG_TAG, "ON FAILURE.");
+                Log.i(deleteOldNoteTask.LOG_TAG, "ERROR !!! OLD NOTE IS NOT DELETED FROM DATABASE !!!");
                 Log.e(deleteOldNoteTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
@@ -213,47 +229,44 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                 releaseHandler();
 
-                mBundle.putParcelable(Constants.RV_STATE_BUNDLE_IN_KEY, mBinding.rvNotes.getLayoutManager().onSaveInstanceState());
+                if (isRecyclerViewReady && !mNoteList.isEmpty())
+                    mBundle.putParcelable(Constants.RV_STATE_BUNDLE_IN_KEY, mBinding.rvNotes.getLayoutManager().onSaveInstanceState());
                 mMainActivity.commitFragment(mCreateEditFragment, mBundle);
             }
         });
     }
 
-    private void addNoteToList() {
+    private void receiveNewNote() {
 
         try {
             mNewNote = (Note) getArguments().getSerializable(Constants.NOTE_BUNDLE_OUT_KEY);
             if (mNewNote == null)
                 throw new NullPointerException();
 
-            mNoteList.add(mNewNote);
-            isNewNoteNotNull = true;
-            Log.i(LOG_TAG, "NEW NOTE IS ADDED TO LIST.");
+            isNewNoteNull = false;
+            Log.i(LOG_TAG, "NEW NOTE IS RECEIVED.");
 
         } catch (NullPointerException _error) {
 
-            isNewNoteNotNull = false;
-            Log.i(LOG_TAG, "NEW NOTE IS NOT ADDED TO LIST. NEW NOTE IS NULL.");
+            isNewNoteNull = true;
+            Log.i(LOG_TAG, "NEW NOTE IS NOT RECEIVED. NEW NOTE IS NULL.");
         }
     }
 
-    private void deleteNoteFromList() {
+    private void receiveOldNote() {
 
         try {
             mOldNote = (Note) getArguments().getSerializable(Constants.OLD_NOTE_BUNDLE_KEY);
             if (mOldNote == null)
                 throw new NullPointerException();
 
-            if (mNoteList.contains(mOldNote)) {
-                mNoteList.remove(mOldNote);
-                isOldNoteNotNull = true;
-                Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM LIST.");
-            }
+            isOldNoteNull = false;
+            Log.i(LOG_TAG, "OLD NOTE IS RECEIVED.");
 
         } catch (NullPointerException _error) {
 
-            isOldNoteNotNull = false;
-            Log.i(LOG_TAG, "OLD NOTE IS NOT DELETED FROM LIST. OLD NOTE IS NULL.");
+            isOldNoteNull = true;
+            Log.i(LOG_TAG, "OLD NOTE IS NOT RECEIVED. OLD NOTE IS NULL.");
         }
     }
 
@@ -273,6 +286,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     }
 
     private void initFragmentAndBundle() {
+
         mCreateEditFragment = new CreateEditFragment();
         mBundle = new Bundle();
     }
@@ -281,27 +295,148 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
         if (mNoteList.isEmpty()) {
 
-            Log.i(LOG_TAG, "LIST IS EMPTY.");
+            if (!isNewNoteNull) {
+
+                createRecyclerView();
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        mNoteAdapter.addNote(0, mNewNote);
+                        mNoteList.add(0, mNewNote);
+                    }
+                }, 200);
+
+                isRecyclerViewReady = true;
+                Log.i(LOG_TAG, "RECYCLER VIEW IS READY.");
+
+            } else
+                Log.i(LOG_TAG, "LIST IS EMPTY.");
+
+            mBinding.floatingActionButton.show();
 
         } else {
 
             Collections.sort(mNoteList);
 
-            mNoteAdapter = new NoteAdapter(mMainActivity, mNoteList);
-            final int spacingInPixels = mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_10dp);
-
-            mBinding.rvNotes.setAdapter(mNoteAdapter);
-            mBinding.rvNotes.setLayoutManager(new LinearLayoutManager(mMainActivity));
-            mBinding.rvNotes.addItemDecoration(new SpacingDecoration(spacingInPixels));
-
-            Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
+            createRecyclerView();
 
             receiveState();
-            if (mState != null)
-                mBinding.rvNotes.getLayoutManager().onRestoreInstanceState(mState);
 
-            setHandler();
+            final Handler handler = new Handler();
+
+            if (!isNewNoteNull && isOldNoteNull) { ////////////////////////////////////// new + null
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        addNote();
+                    }
+                }, 200);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        recyclerViewIsReady();
+                    }
+                }, 600);
+
+            } else if (isNewNoteNull && !isOldNoteNull) { /////////////////////////////// null + old
+
+                if (mState != null)
+                    mBinding.rvNotes.getLayoutManager().onRestoreInstanceState(mState);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        deleteNote();
+                    }
+                }, 200);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        recyclerViewIsReady();
+                    }
+                }, 600);
+
+            } else if (!isNewNoteNull) { ///////////////////////////////////////////////// new + old
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        addNote();
+                    }
+                }, 200);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        deleteNote();
+                    }
+                }, 500);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        recyclerViewIsReady();
+                    }
+                }, 900);
+
+            } else { /////////////////////////////////////////////////////////////////// null + null
+
+                if (mState != null)
+                    mBinding.rvNotes.getLayoutManager().onRestoreInstanceState(mState);
+
+                recyclerViewIsReady();
+            }
+
+            mBinding.floatingActionButton.show();
         }
+    }
+
+    private void createRecyclerView() {
+
+        mNoteAdapter = new NoteAdapter(mMainActivity, mNoteList);
+
+        mBinding.rvNotes.setAdapter(mNoteAdapter);
+        mBinding.rvNotes.setLayoutManager(new LinearLayoutManager(mMainActivity));
+        mBinding.rvNotes.setItemAnimator(new FlipInBottomXAnimator());
+
+        mBinding.rvNotes.getItemAnimator().setAddDuration(300);
+        mBinding.rvNotes.getItemAnimator().setRemoveDuration(300);
+        mBinding.rvNotes.getItemAnimator().setMoveDuration(300);
+
+        Log.i(LOG_TAG, "RECYCLER VIEW IS CREATED.");
+
+        setHandler();
+    }
+
+    private void addNote() {
+        mBinding.rvNotes.getLayoutManager().scrollToPosition(0);
+        mNoteAdapter.addNote(0, mNewNote);
+        mNoteList.add(0, mNewNote);
+    }
+
+    private void deleteNote() {
+        if (mNoteList.contains(mOldNote)) {
+            mNoteAdapter.removeNote(mNoteList.indexOf(mOldNote));
+            mNoteList.remove(mOldNote);
+        }
+    }
+
+    private void recyclerViewIsReady() {
+        isRecyclerViewReady = true;
+        Log.i(LOG_TAG, "RECYCLER VIEW IS READY.");
     }
 
     @Override
@@ -319,21 +454,15 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     }
 
     private void setHandler() {
-        try {
-            if (mNoteAdapter != null)
-                mNoteAdapter.setNoteHandler(this);
-        } catch (Exception _error) {
-            Log.e(LOG_TAG, _error.toString());
-        }
+
+        if (mNoteAdapter != null)
+            mNoteAdapter.setNoteHandler(this);
     }
 
     private void releaseHandler() {
-        try {
-            if (mNoteAdapter != null)
-                mNoteAdapter.releaseNoteHandler();
-        } catch (Exception _error) {
-            Log.e(LOG_TAG, _error.toString());
-        }
+
+        if (mNoteAdapter != null)
+            mNoteAdapter.releaseNoteHandler();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -355,7 +484,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onSuccess() {
 
-                Log.i(deleteSelectedNotesTask.LOG_TAG, "ON SUCCESS.");
+                Log.i(deleteSelectedNotesTask.LOG_TAG, "SELECTED NOTES ARE DELETED FROM DATABASE.");
                 mDatabaseHelper.close();
 
                 mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
@@ -370,7 +499,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(deleteSelectedNotesTask.LOG_TAG, "ON FAILURE.");
+                Log.i(deleteSelectedNotesTask.LOG_TAG, "ERROR !!! SELECTED NOTES ARE NOT DELETED FROM DATABASE !!!");
                 Log.e(deleteSelectedNotesTask.LOG_TAG, _error.toString());
 
                 mDatabaseHelper.close();
@@ -383,26 +512,33 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     @Override
     public void onClick(Note _note, int _position) {
 
-        if (mActionMode != null)
-            toggleSelection(_position);
+        if (isRecyclerViewReady) {
 
-        else {
+            if (mActionMode != null)
+                toggleSelection(_position);
 
-            releaseHandler();
+            else {
 
-            mBundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
-            mBundle.putParcelable(Constants.RV_STATE_BUNDLE_IN_KEY, mBinding.rvNotes.getLayoutManager().onSaveInstanceState());
-            mMainActivity.commitFragment(mCreateEditFragment, mBundle);
+                releaseHandler();
+
+                mBundle.putSerializable(Constants.NOTE_BUNDLE_IN_KEY, _note);
+                if (isRecyclerViewReady && !mNoteList.isEmpty())
+                    mBundle.putParcelable(Constants.RV_STATE_BUNDLE_IN_KEY, mBinding.rvNotes.getLayoutManager().onSaveInstanceState());
+                mMainActivity.commitFragment(mCreateEditFragment, mBundle);
+            }
         }
     }
 
     @Override
     public void onLongClick(Note _note, int _position) {
 
-        if (mActionMode == null)
-            initActionMode();
+        if (isRecyclerViewReady) {
 
-        toggleSelection(_position);
+            if (mActionMode == null)
+                initActionMode();
+
+            toggleSelection(_position);
+        }
     }
 
     private void toggleSelection(int _position) {
@@ -497,9 +633,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                     case R.id.mi_share:
 
                         if (isSearchViewOpened)
-                            shareNotes(mNoteAdapter, mFilteredList);
+                            mSupport.shareNotes(mMainActivity, mNoteAdapter, mFilteredList);
                         else
-                            shareNotes(mNoteAdapter, mNoteList);
+                            mSupport.shareNotes(mMainActivity, mNoteAdapter, mNoteList);
 
                         _mode.finish();
 
@@ -550,44 +686,17 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 mNoteAdapter.clearSelection();
                 mActionMode = null;
 
-                if (!isSearchViewOpened) {
-                    mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
+                if (isSearchViewOpened) {
+                    if (mFilteredList.isEmpty())
+                        mSearchView.setQuery("", true);
+                } else {
+                    mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_88dp));
                     mBinding.floatingActionButton.show();
-                } else
-                    mSearchView.setQuery("", true);
+                }
             }
         };
 
         mActionMode = mMainActivity.startSupportActionMode(actionModeCallBack);
-    }
-
-    private void shareNotes(NoteAdapter _noteAdapter, List<Note> _noteList) {
-
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        for (int i = 0; i < _noteAdapter.getSelectedItems().size(); i++) {
-
-            final int index = _noteAdapter.getSelectedItems().get(i);
-
-            stringBuilder.append(_noteList.get(index).getFormattedDate());
-            stringBuilder.append(" - ");
-            stringBuilder.append(_noteList.get(index).getFormattedTime());
-            stringBuilder.append("\n");
-            stringBuilder.append(_noteList.get(index).getBody());
-
-            if (i != _noteAdapter.getSelectedItems().size() - 1)
-                stringBuilder.append("\n\n**********\n\n");
-        }
-
-        final Intent shareNoteIntent = new Intent(android.content.Intent.ACTION_SEND);
-        shareNoteIntent.setType("text/plain");
-        shareNoteIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, mMainActivity.getResources().getString(R.string.s_share_notes));
-        shareNoteIntent.putExtra(android.content.Intent.EXTRA_TEXT, stringBuilder.toString());
-
-        if (shareNoteIntent.resolveActivity(mMainActivity.getPackageManager()) != null)
-            startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_notes)));
-        else
-            Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -616,8 +725,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public boolean onQueryTextChange(String _query) {
 
-                if (mNoteList != null && !mNoteList.isEmpty()) {
-                    filterList(mNoteList, _query, mFilteredList);
+                if (isRecyclerViewReady) {
+                    mSupport.filterList(mNoteList, _query, mFilteredList);
                     mNoteAdapter.animateTo(mFilteredList);
                     mBinding.rvNotes.scrollToPosition(0);
                 }
@@ -645,7 +754,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
                 mFilteredList.clear();
 
-                mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_78dp));
+                mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_88dp));
                 mBinding.floatingActionButton.show();
 
                 isSearchViewOpened = false;
@@ -655,18 +764,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         });
 
         super.onCreateOptionsMenu(_menu, _inflater);
-    }
-
-    private void filterList(List<Note> _noteList, String _query, List<Note> _filteredList) {
-        _query = _query.toLowerCase();
-
-        _filteredList.clear();
-        for (Note note : _noteList) {
-            final String noteBody = note.getBody().toLowerCase();
-            final String noteDate = note.getFormattedDate().toLowerCase();
-            if (noteBody.contains(_query) || noteDate.contains(_query))
-                _filteredList.add(note);
-        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -8,6 +8,11 @@
         android:title="@string/s_share_note"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/mi_delete"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/s_delete_note"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/mi_save"
         android:icon="@drawable/ic_save"
         android:title="@string/s_save_note"

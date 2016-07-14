@@ -2,8 +2,9 @@
     <dimen name="d_size_1dp">1dp</dimen>
     <dimen name="d_size_10dp">10dp</dimen>
     <dimen name="d_size_12dp">12dp</dimen>
+    <dimen name="d_size_15dp">15dp</dimen>
     <dimen name="d_size_30dp">30dp</dimen>
-    <dimen name="d_size_78dp">78dp</dimen>
+    <dimen name="d_size_88dp">88dp</dimen>
 
     <dimen name="d_text_12sp">12sp</dimen>
     <dimen name="d_text_14sp">14sp</dimen>

@@ -1,13 +1,11 @@
 package mitso.v.homework_22.fragments.create_fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.view.ContextThemeWrapper;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,15 +25,18 @@ import mitso.v.homework_22.databinding.FragmentCreateEditBinding;
 import mitso.v.homework_22.fragments.BaseFragment;
 import mitso.v.homework_22.fragments.list_fragment.ListFragment;
 import mitso.v.homework_22.models.Note;
+import mitso.v.homework_22.support.Support;
 
 public class CreateEditFragment extends BaseFragment {
 
     private String                      LOG_TAG = Constants.CREATE_EDIT_FRAGMENT_LOG_TAG;
 
+    private Support                     mSupport;
+
     private FragmentCreateEditBinding   mBinding;
 
     private Note                        mNote;
-    private boolean                     isNoteNotNull;
+    private boolean                     isNoteNull;
 
     private Parcelable                  mState;
 
@@ -52,13 +53,15 @@ public class CreateEditFragment extends BaseFragment {
         mBinding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_create_edit, _container, false);
         final View rootView = mBinding.getRoot();
 
+        mSupport = new Support();
+
         receiveNote();
         receiveState();
 
         setHasOptionsMenu(true);
         initActionBar();
 
-        if (!isNoteNotNull)
+        if (isNoteNull)
             showKeyboardAndSetFocus(mBinding.etCreateEditNote);
 
         initFragmentAndBundle();
@@ -73,7 +76,8 @@ public class CreateEditFragment extends BaseFragment {
         Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
         Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
-        mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
+        if (mState != null)
+            mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
         mMainActivity.commitFragment(mListFragment, mBundle);
     }
 
@@ -85,14 +89,10 @@ public class CreateEditFragment extends BaseFragment {
             mMainActivity.getSupportActionBar().setHomeButtonEnabled(true);
             mMainActivity.getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-            if (isNoteNotNull)
-                mMainActivity.getSupportActionBar().setTitle(Html.fromHtml("<font color='#" +
-                        Integer.toHexString(getResources().getColor(R.color.c_action_bar_text)).substring(2) +
-                        "'>" + getResources().getString(R.string.s_edit_note) + "</font>"));
+            if (isNoteNull)
+                mMainActivity.getSupportActionBar().setTitle(mMainActivity.getResources().getString(R.string.s_create_note));
             else
-                mMainActivity.getSupportActionBar().setTitle(Html.fromHtml("<font color='#" +
-                        Integer.toHexString(getResources().getColor(R.color.c_action_bar_text)).substring(2) +
-                        "'>" + getResources().getString(R.string.s_create_note) + "</font>"));
+                mMainActivity.getSupportActionBar().setTitle(mMainActivity.getResources().getString(R.string.s_edit_note));
         }
     }
 
@@ -106,31 +106,26 @@ public class CreateEditFragment extends BaseFragment {
     public boolean onOptionsItemSelected(MenuItem _item) {
 
         switch (_item.getItemId()) {
-            case android.R.id.home:
-
-                Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
-                Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
-
-                mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
-                mMainActivity.commitFragment(mListFragment, mBundle);
-
-                return true;
             case R.id.mi_share:
 
-                if (!mBinding.etCreateEditNote.getText().toString().isEmpty()) {
+                mSupport.shareNote(mMainActivity, mBinding.etCreateEditNote);
 
-                    final Intent shareNoteIntent = new Intent(android.content.Intent.ACTION_SEND);
-                    shareNoteIntent.setType("text/plain");
-                    shareNoteIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, mMainActivity.getResources().getString(R.string.s_share_note));
-                    shareNoteIntent.putExtra(android.content.Intent.EXTRA_TEXT, mBinding.etCreateEditNote.getText().toString());
+                return true;
+            case R.id.mi_delete:
 
-                    if (shareNoteIntent.resolveActivity(mMainActivity.getPackageManager()) != null)
-                        startActivity(Intent.createChooser(shareNoteIntent, mMainActivity.getResources().getString(R.string.s_share_note)));
-                    else
-                        Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_no_program), Toast.LENGTH_LONG).show();
+                if (!isNoteNull) {
+
+                    Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
+
+                    mBundle.putSerializable(Constants.OLD_NOTE_BUNDLE_KEY, mNote);
+                    Log.i(LOG_TAG, "OLD NOTE IS SENT.");
+
+                    if (mState != null)
+                        mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
+                    mMainActivity.commitFragment(mListFragment, mBundle);
 
                 } else
-                    Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_empty_note), Toast.LENGTH_LONG).show();
+                    Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.s_not_in_list), Toast.LENGTH_LONG).show();
 
                 return true;
             case R.id.mi_save:
@@ -145,7 +140,7 @@ public class CreateEditFragment extends BaseFragment {
                 } else
                     Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
 
-                if (isNoteNotNull) {
+                if (!isNoteNull) {
 
                     mBundle.putSerializable(Constants.OLD_NOTE_BUNDLE_KEY, mNote);
                     Log.i(LOG_TAG, "OLD NOTE IS SENT.");
@@ -153,7 +148,18 @@ public class CreateEditFragment extends BaseFragment {
                 } else
                     Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
 
-                mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
+                if (mState != null)
+                    mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
+                mMainActivity.commitFragment(mListFragment, mBundle);
+
+                return true;
+            case android.R.id.home:
+
+                Log.i(LOG_TAG, "NEW NOTE IS NOT SENT. NEW NOTE IS NULL.");
+                Log.i(LOG_TAG, "OLD NOTE IS NOT SENT. OLD NOTE IS NULL.");
+
+                if (mState != null)
+                    mBundle.putParcelable(Constants.RV_STATE_BUNDLE_OUT_KEY, mState);
                 mMainActivity.commitFragment(mListFragment, mBundle);
 
                 return true;
@@ -195,12 +201,12 @@ public class CreateEditFragment extends BaseFragment {
                 throw new NullPointerException();
 
             mBinding.etCreateEditNote.setText(mNote.getBody());
-            isNoteNotNull = true;
+            isNoteNull = false;
             Log.i(LOG_TAG, "NOTE IS RECEIVED.");
 
         } catch (NullPointerException _error) {
 
-            isNoteNotNull = false;
+            isNoteNull = true;
             Log.i(LOG_TAG, "NOTE IS NOT RECEIVED. NOTE IS NULL.");
         }
     }

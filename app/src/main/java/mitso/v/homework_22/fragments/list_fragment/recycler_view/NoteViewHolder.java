@@ -4,11 +4,11 @@ import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import mitso.v.homework_22.databinding.NoteCardBinding;
+import mitso.v.homework_22.databinding.CardNoteBinding;
 
 public class NoteViewHolder extends RecyclerView.ViewHolder {
 
-    private NoteCardBinding     mBinding;
+    private CardNoteBinding mBinding;
 
     public NoteViewHolder(View _itemView) {
         super(_itemView);
@@ -16,7 +16,7 @@ public class NoteViewHolder extends RecyclerView.ViewHolder {
         mBinding = DataBindingUtil.bind(_itemView);
     }
 
-    public NoteCardBinding getBinding() {
+    public CardNoteBinding getBinding() {
         return mBinding;
     }
 }

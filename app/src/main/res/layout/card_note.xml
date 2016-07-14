@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="note"
+            type="mitso.v.homework_22.models.Note" />
+
+        <variable
+            name="clickerOpenNote"
+            type="android.view.View.OnClickListener" />
+
+        <variable
+            name="clickerSelectNote"
+            type="android.view.View.OnLongClickListener" />
+    </data>
+
+    <LinearLayout
+        android:id="@+id/card_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/d_size_15dp"
+            app:onClickListener="@{clickerOpenNote}"
+            app:onLongClickListener="@{clickerSelectNote}">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="@{note.body}"
+                android:textColor="@color/c_card_text"
+                android:textSize="@dimen/d_text_14sp"
+                tools:text="note body" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@{note.formattedTime}"
+                android:textColor="@color/c_card_text"
+                android:textSize="@dimen/d_text_12sp"
+                tools:text="note time" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="@{note.formattedDate}"
+                android:textColor="@color/c_card_text"
+                android:textSize="@dimen/d_text_12sp"
+                tools:text="note date" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/d_size_1dp"
+            android:background="@color/c_card_line" />
+
+    </LinearLayout>
+
+</layout>
