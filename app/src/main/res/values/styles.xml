@@ -4,10 +4,19 @@
 
         <item name="colorPrimary">@color/c_action_bar</item>
         <item name="android:actionModeBackground">@color/c_action_bar</item>
+        <item name="actionModeBackground">@color/c_action_bar</item>
         <item name="android:editTextColor">@color/c_action_bar_text</item>
         <item name="colorAccent">@color/c_action_bar_accent</item>
 
+        <item name="android:actionBarStyle">@style/ActionBarTheme</item>
+        <item name="actionBarStyle">@style/ActionBarTheme</item>
+        <item name="android:windowContentOverlay">@null</item>
+
         <item name="android:windowBackground">@color/c_background</item>
+    </style>
+
+    <style name="ActionBarTheme" parent="style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="elevation">0dp</item>
     </style>
 
     <style name="FragmentCreateEditTheme" parent="Theme.AppCompat.Light.DarkActionBar">

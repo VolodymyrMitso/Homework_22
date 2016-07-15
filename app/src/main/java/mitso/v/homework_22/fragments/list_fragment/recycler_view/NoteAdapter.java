@@ -1,7 +1,6 @@
 package mitso.v.homework_22.fragments.list_fragment.recycler_view;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,9 +55,9 @@ public final class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
             }
         });
 
-        final Drawable selectedShape = mContext.getResources().getDrawable(R.drawable.shape_card_selected);
-        final Drawable defaultShape = mContext.getResources().getDrawable(R.drawable.shape_card_default);
-        _holder.getBinding().cardNote.setBackgroundDrawable(isSelected(_position) ? selectedShape : defaultShape);
+        _holder.getBinding().cardNote.setBackgroundColor(isSelected(_position) ?
+                mContext.getResources().getColor(R.color.c_card_selected) :
+                mContext.getResources().getColor(R.color.c_card_default));
 
     }
 

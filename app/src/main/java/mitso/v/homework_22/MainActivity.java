@@ -14,9 +14,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setElevation(0);
-
         DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         commitFragment(new ListFragment(), null);
