@@ -23,4 +23,10 @@ public final class Constants {
     public static final String NOTE_BUNDLE_IN_KEY       = "NOTE_BUNDLE_IN_KEY";
     public static final String NOTE_BUNDLE_OUT_KEY      = "NOTE_BUNDLE_OUT_KEY";
     public static final String OLD_NOTE_BUNDLE_KEY      = "OLD_NOTE_BUNDLE_KEY";
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static final String FORMATTED_DATE_AND_TIME  = "yyyyMMddHHmmssSSS";
+    public static final String FORMATTED_DATE           = "dd MMMM yyyy";
+    public static final String FORMATTED_TIME           = "HH:mm";
 }
