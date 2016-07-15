@@ -11,7 +11,7 @@ import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
 import mitso.v.homework_22.models.Note;
 
-public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
+public final class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
 
     public String       LOG_TAG = Constants.GET_ALL_NOTES_TASK_LOG_TAG;
 

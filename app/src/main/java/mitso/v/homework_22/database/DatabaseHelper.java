@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class DatabaseHelper extends SQLiteOpenHelper {
+public final class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String      DATABASE_NAME = "notes_database.db";
     public static final int         DATABASE_VERSION = 1;
@@ -30,6 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase _db) {
+
         _db.execSQL(
                 CREATE_TABLE + SPACE + DATABASE_TABLE + SPACE +
                 PARENTHESES_IN +

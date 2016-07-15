@@ -11,7 +11,7 @@ import mitso.v.homework_22.R;
 import mitso.v.homework_22.fragments.list_fragment.recycler_view.NoteAdapter;
 import mitso.v.homework_22.models.Note;
 
-public class Support {
+public final class Support {
 
     public void shareNote(Context _context, EditText _editText) {
 

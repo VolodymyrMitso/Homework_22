@@ -8,7 +8,7 @@ import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
 import mitso.v.homework_22.models.Note;
 
-public class AddNewNoteTask extends AsyncTask<Void, Void, Void> {
+public final class AddNewNoteTask extends AsyncTask<Void, Void, Void> {
 
     public String       LOG_TAG = Constants.ADD_NEW_NOTE_TASK_LOG_TAG;
 

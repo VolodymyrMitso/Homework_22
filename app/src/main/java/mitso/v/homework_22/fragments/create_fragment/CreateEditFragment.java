@@ -47,7 +47,7 @@ public class CreateEditFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater _inflater, @Nullable ViewGroup _container, @Nullable Bundle _savedInstanceState) {
 
-        final ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(mMainActivity, R.style.FragmentTheme);
+        final ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(mMainActivity, R.style.FragmentCreateEditTheme);
         final LayoutInflater layoutInflater = _inflater.cloneInContext(contextThemeWrapper);
 
         mBinding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_create_edit, _container, false);

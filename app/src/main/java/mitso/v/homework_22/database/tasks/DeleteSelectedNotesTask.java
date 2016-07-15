@@ -9,7 +9,7 @@ import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
 import mitso.v.homework_22.models.Note;
 
-public class DeleteSelectedNotesTask extends AsyncTask<Void, Void, Void> {
+public final class DeleteSelectedNotesTask extends AsyncTask<Void, Void, Void> {
 
     public String       LOG_TAG = Constants.DELETE_SELECTED_NOTES_TASK_LOG_TAG;
 

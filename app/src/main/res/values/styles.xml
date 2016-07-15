@@ -1,5 +1,5 @@
 <resources>
-    <style name="ActivityTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="GeneralTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimaryDark">@color/c_status_bar</item>
 
         <item name="colorPrimary">@color/c_action_bar</item>
@@ -10,7 +10,7 @@
         <item name="android:windowBackground">@color/c_background</item>
     </style>
 
-    <style name="FragmentTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="FragmentCreateEditTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimaryDark">@color/c_status_bar</item>
         <item name="colorPrimary">@color/c_action_bar</item>
         <item name="colorAccent">@color/c_create_edit_accent</item>

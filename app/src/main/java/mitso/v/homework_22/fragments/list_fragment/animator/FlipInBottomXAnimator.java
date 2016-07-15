@@ -3,7 +3,7 @@ package mitso.v.homework_22.fragments.list_fragment.animator;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 
-public class FlipInBottomXAnimator extends BaseItemAnimator {
+public final class FlipInBottomXAnimator extends BaseItemAnimator {
 
     @Override protected void animateRemoveImpl(final RecyclerView.ViewHolder _holder) {
         ViewCompat.animate(_holder.itemView)

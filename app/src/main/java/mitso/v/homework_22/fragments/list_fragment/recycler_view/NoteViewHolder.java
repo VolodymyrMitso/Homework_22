@@ -6,7 +6,7 @@ import android.view.View;
 
 import mitso.v.homework_22.databinding.CardNoteBinding;
 
-public class NoteViewHolder extends RecyclerView.ViewHolder {
+public final class NoteViewHolder extends RecyclerView.ViewHolder {
 
     private CardNoteBinding mBinding;
 

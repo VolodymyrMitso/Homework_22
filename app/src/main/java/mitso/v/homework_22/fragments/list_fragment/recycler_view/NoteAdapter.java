@@ -17,7 +17,7 @@ import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.databinding.CardNoteBinding;
 import mitso.v.homework_22.models.Note;
 
-public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
+public final class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
 
     private String          LOG_TAG = Constants.NOTE_ADAPTER_LOG_TAG;
 

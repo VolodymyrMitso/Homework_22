@@ -6,8 +6,9 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
-public class Note implements Serializable, Comparable<Note> {
+public final class Note implements Serializable, Comparable<Note> {
 
     private long        mId;
     private String      mBody;
@@ -15,21 +16,18 @@ public class Note implements Serializable, Comparable<Note> {
     private String      mFormattedDate;
 
     public Note(String _body, Date _date) {
-        this.mId = Long.parseLong(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(_date));
+        this.mId = Long.parseLong(new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.getDefault()).format(_date));
         this.mBody = _body;
         this.mDate = _date;
-        this.mFormattedDate = new SimpleDateFormat("dd MMMM yyyy").format(_date);
+        this.mFormattedDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(_date);
     }
 
-    public Note(long _id, String _body) {
+    public Note(long _id, String _body) throws ParseException {
         this.mId = _id;
         this.mBody = _body;
-        try {
-            this.mDate = new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(String.valueOf(_id));
-            this.mFormattedDate = new SimpleDateFormat("dd MMMM yyyy").format(mDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        this.mDate = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.getDefault()).parse(String.valueOf(_id));
+        this.mFormattedDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(mDate);
+
     }
 
     @Override
@@ -78,7 +76,7 @@ public class Note implements Serializable, Comparable<Note> {
     }
 
     public String getFormattedTime() {
-        return new SimpleDateFormat("HH:mm").format(mDate);
+        return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(mDate);
     }
 
 }

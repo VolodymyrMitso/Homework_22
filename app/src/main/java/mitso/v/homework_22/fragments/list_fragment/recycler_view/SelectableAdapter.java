@@ -20,7 +20,7 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
         return getSelectedItems().contains(_position);
     }
 
-    public void toggleSelection(int _position) {
+    public void makeSelection(int _position) {
 
         if (mSelectedItems.get(_position, false))
             mSelectedItems.delete(_position);
@@ -31,6 +31,7 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
     }
 
     public void clearSelection() {
+
         final List<Integer> selection = getSelectedItems();
         mSelectedItems.clear();
         for (Integer i : selection)
@@ -42,6 +43,7 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
     }
 
     public List<Integer> getSelectedItems() {
+
         final List <Integer> items = new ArrayList<>(mSelectedItems.size());
         for (int i = 0; i < mSelectedItems.size(); i++)
             items.add(mSelectedItems.keyAt(i));
