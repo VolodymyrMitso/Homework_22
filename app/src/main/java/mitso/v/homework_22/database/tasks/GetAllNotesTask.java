@@ -1,5 +1,6 @@
 package mitso.v.homework_22.database.tasks;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -11,11 +12,12 @@ import mitso.v.homework_22.constants.Constants;
 import mitso.v.homework_22.database.DatabaseHelper;
 import mitso.v.homework_22.models.Note;
 
-public final class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
+public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
 
-    public String       LOG_TAG = Constants.GET_ALL_NOTES_TASK_LOG_TAG;
+    public String               LOG_TAG = Constants.GET_ALL_NOTES_TASK_LOG_TAG;
 
     public interface Callback{
+
         void onSuccess(List<Note> _result);
         void onFailure(Throwable _error);
     }
@@ -27,21 +29,26 @@ public final class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
     private SQLiteDatabase      mSQLiteDatabase;
     private Cursor              mCursor;
 
-    public GetAllNotesTask(DatabaseHelper mDatabaseHelper) {
-        this.mDatabaseHelper = mDatabaseHelper;
+    public GetAllNotesTask(Context _context) {
+
+        this.mDatabaseHelper = DatabaseHelper.getDatabaseHelper(_context);
         this.mNoteList = new ArrayList<>();
     }
 
     public void setCallback(Callback _callback) {
-        mCallback = _callback;
+
+        if (mCallback == null)
+            mCallback = _callback;
     }
 
     public void releaseCallback() {
-        mCallback = null;
+
+        if (mCallback != null)
+            mCallback = null;
     }
 
     @Override
-    protected List<Note> doInBackground(Void ... _params) {
+    protected List<Note> doInBackground(Void ... _voids) {
 
         try {
 
@@ -76,6 +83,9 @@ public final class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
 
             if (mSQLiteDatabase != null && mSQLiteDatabase.isOpen())
                 mSQLiteDatabase.close();
+
+            if (mDatabaseHelper != null)
+                mDatabaseHelper.close();
         }
 
         return null;
@@ -86,6 +96,7 @@ public final class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
         super.onPostExecute(_noteList);
 
         if (mCallback != null) {
+
             if (mException == null)
                 mCallback.onSuccess(mNoteList);
             else

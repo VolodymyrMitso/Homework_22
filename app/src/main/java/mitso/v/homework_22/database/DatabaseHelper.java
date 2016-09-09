@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public final class DatabaseHelper extends SQLiteOpenHelper {
+public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String      DATABASE_NAME = "notes_database.db";
     public static final int         DATABASE_VERSION = 1;
@@ -24,9 +24,24 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
     public static final String      PARENTHESES_IN = "(";
     public static final String      PARENTHESES_OUT = ")";
 
-    public DatabaseHelper(Context _context) {
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static DatabaseHelper instance;
+
+    private DatabaseHelper(Context _context) {
+
         super(_context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+
+    public static synchronized DatabaseHelper getDatabaseHelper(Context _context) {
+
+        if (instance == null)
+            instance = new DatabaseHelper(_context);
+
+        return instance;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void onCreate(SQLiteDatabase _db) {

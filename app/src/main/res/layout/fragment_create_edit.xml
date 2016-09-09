@@ -5,7 +5,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/d_size_10dp">
+        android:padding="@dimen/d_size_15dp">
 
         <EditText
             android:id="@+id/et_create_edit_note"

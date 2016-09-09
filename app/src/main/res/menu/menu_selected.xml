@@ -4,17 +4,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/mi_select_all"
-        android:icon="@drawable/ic_select_all_empty"
+        android:icon="@drawable/ic_select_on_white_24dp"
         android:title="@string/s_select_all_notes"
         app:showAsAction="always"/>
     <item
         android:id="@+id/mi_share"
-        android:icon="@drawable/ic_share"
+        android:icon="@drawable/ic_share_white_24dp"
         android:title="@string/s_share_notes"
         app:showAsAction="always"/>
     <item
         android:id="@+id/mi_remove"
-        android:icon="@drawable/ic_delete"
+        android:icon="@drawable/ic_delete_white_24dp"
         android:title="@string/s_delete_notes"
         app:showAsAction="always"/>
 

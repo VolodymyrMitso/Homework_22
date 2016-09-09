@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import mitso.v.homework_22.fragments.BaseFragment;
-import mitso.v.homework_22.fragments.list_fragment.ListFragment;
+import mitso.v.homework_22.fragments.ListFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
         final BaseFragment baseFragment = (BaseFragment) getSupportFragmentManager().findFragmentById(R.id.fl_container);
         baseFragment.onBackPressed();
     }

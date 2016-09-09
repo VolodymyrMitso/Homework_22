@@ -14,7 +14,7 @@
     <string name="s_delete_note">Delete note</string>
     <string name="s_save_note">Save note</string>
 
-    <string name="s_no_program">You do not have right program for this action.</string>
+    <string name="s_no_program">You do not have program for this action.</string>
     <string name="s_empty_note">Note is empty.</string>
     <string name="s_not_in_list">Note is not in list.</string>
 </resources>

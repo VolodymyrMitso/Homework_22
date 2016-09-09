@@ -28,7 +28,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/d_size_15dp"
             app:onClickListener="@{clickerOpenNote}"
             app:onLongClickListener="@{clickerSelectNote}">
 
@@ -36,28 +35,46 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
+                android:padding="@dimen/d_size_15dp"
                 android:text="@{note.body}"
                 android:textColor="@color/c_card_text"
-                android:textSize="@dimen/d_text_14sp"
-                tools:text="note body" />
+                android:textSize="@dimen/d_text_16sp"
+                tools:text="Very important note." />
 
-            <TextView
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="end"
-                android:text="@{note.formattedTime}"
-                android:textColor="@color/c_card_text"
-                android:textSize="@dimen/d_text_12sp"
-                tools:text="note time" />
+                android:paddingBottom="@dimen/d_size_10dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:text="@{note.formattedDate}"
-                android:textColor="@color/c_card_text"
-                android:textSize="@dimen/d_text_12sp"
-                tools:text="note date" />
+                <TextView
+                    android:id="@+id/tv_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginEnd="@dimen/d_size_15dp"
+                    android:layout_marginRight="@dimen/d_size_15dp"
+                    android:text="@{note.shortFormattedDate}"
+                    android:textColor="@color/c_card_text"
+                    android:textSize="@dimen/d_text_12sp"
+                    android:textStyle="bold"
+                    tools:text="01 September" />
+
+                <TextView
+                    android:id="@+id/tv_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="@dimen/d_size_10dp"
+                    android:layout_marginRight="@dimen/d_size_10dp"
+                    android:layout_toLeftOf="@+id/tv_date"
+                    android:layout_toStartOf="@+id/tv_date"
+                    android:text="@{note.formattedTime}"
+                    android:textColor="@color/c_card_text"
+                    android:textSize="@dimen/d_text_12sp"
+                    tools:text="08:00" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 

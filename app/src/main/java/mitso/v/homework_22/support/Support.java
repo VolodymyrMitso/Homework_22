@@ -8,10 +8,10 @@ import android.widget.Toast;
 import java.util.List;
 
 import mitso.v.homework_22.R;
-import mitso.v.homework_22.fragments.list_fragment.recycler_view.NoteAdapter;
 import mitso.v.homework_22.models.Note;
+import mitso.v.homework_22.recycler_view.NoteAdapter;
 
-public final class Support {
+public class Support {
 
     public void shareNote(Context _context, EditText _editText) {
 
@@ -39,7 +39,7 @@ public final class Support {
 
             final int index = _noteAdapter.getSelectedItems().get(i);
 
-            stringBuilder.append(_noteList.get(index).getFormattedDate());
+            stringBuilder.append(_noteList.get(index).getFullFormattedDate());
             stringBuilder.append(" - ");
             stringBuilder.append(_noteList.get(index).getFormattedTime());
             stringBuilder.append("\n");
@@ -61,12 +61,15 @@ public final class Support {
     }
 
     public void filterList(List<Note> _noteList, String _query, List<Note> _filteredList) {
+
         _query = _query.toLowerCase();
 
         _filteredList.clear();
+
         for (Note note : _noteList) {
+
             final String noteBody = note.getBody().toLowerCase();
-            final String noteDate = note.getFormattedDate().toLowerCase();
+            final String noteDate = note.getFullFormattedDate().toLowerCase();
             if (noteBody.contains(_query) || noteDate.contains(_query))
                 _filteredList.add(note);
         }
