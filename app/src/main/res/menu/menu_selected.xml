@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/mi_select_all"
-        android:icon="@drawable/ic_select_on_white_24dp"
+        android:icon="@drawable/ic_select_all_white_24dp"
         android:title="@string/s_select_all_notes"
         app:showAsAction="always"/>
     <item

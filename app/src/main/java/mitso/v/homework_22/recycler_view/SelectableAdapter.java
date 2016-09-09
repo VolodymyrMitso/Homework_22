@@ -17,11 +17,6 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
         this.mSelectedItems = new SparseBooleanArray();
     }
 
-    public boolean isSelected(int _position) {
-
-        return getSelectedItems().contains(_position);
-    }
-
     public void makeSelection(int _position) {
 
         if (mSelectedItems.get(_position, false))
@@ -40,9 +35,14 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
             notifyItemChanged(i);
     }
 
-    public int getSelectedItemCount() {
+    public void selectAllItems(List<Note> _noteList) {
 
-        return mSelectedItems.size();
+        clearSelection();
+
+        for (int i = 0; i < _noteList.size(); i++) {
+            mSelectedItems.put(i, true);
+            notifyItemChanged(i);
+        }
     }
 
     public List<Integer> getSelectedItems() {
@@ -53,30 +53,14 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
 
         return items;
     }
-    
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private SparseBooleanArray          mTempSelectedItems;
-    
-    public void selectAllItems(List<Note> _noteList) {
+    public int getSelectedItemCount() {
 
-        mTempSelectedItems = mSelectedItems.clone();
-
-        clearSelection();
-
-        for (int i = 0; i < _noteList.size(); i++) {
-            mSelectedItems.put(i, true);
-            notifyItemChanged(i);
-        }
+        return mSelectedItems.size();
     }
 
-    public void deselectAllItems() {
+    public boolean isSelected(int _position) {
 
-        clearSelection();
-
-        for (int i = 0; i < mTempSelectedItems.size(); i++) {
-            mSelectedItems.put(mTempSelectedItems.keyAt(i), true);
-            notifyItemChanged(i);
-        }
+        return getSelectedItems().contains(_position);
     }
 }

@@ -115,7 +115,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onSuccess(List<Note> _result) {
 
-                Log.i(getAllNotesTask.LOG_TAG, "ALL NOTES ARE TAKEN FROM DATABASE.");
+                Log.i(getAllNotesTask.LOG_TAG, "DONE.");
 
                 mNoteList = _result;
 
@@ -140,7 +140,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(getAllNotesTask.LOG_TAG, "ERROR !!! ALL NOTES ARE NOT TAKEN FROM DATABASE !!!");
+                Log.i(getAllNotesTask.LOG_TAG, "ERROR!");
                 Log.e(getAllNotesTask.LOG_TAG, _error.toString());
 
                 getAllNotesTask.releaseCallback();
@@ -169,7 +169,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(addNewNoteTask.LOG_TAG, "ERROR !!! NEW NOTE IS NOT ADDED TO DATABASE !!!");
+                Log.i(addNewNoteTask.LOG_TAG, "ERROR!");
                 Log.e(addNewNoteTask.LOG_TAG, _error.toString());
 
                 addNewNoteTask.releaseCallback();
@@ -195,7 +195,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             @Override
             public void onFailure(Throwable _error) {
 
-                Log.i(deleteOldNoteTask.LOG_TAG, "ERROR !!! OLD NOTE IS NOT DELETED FROM DATABASE !!!");
+                Log.i(deleteOldNoteTask.LOG_TAG, "ERROR!");
                 Log.e(deleteOldNoteTask.LOG_TAG, _error.toString());
 
                 deleteOldNoteTask.releaseCallback();
@@ -389,15 +389,21 @@ public class ListFragment extends BaseFragment implements INoteHandler {
     private void addNote() {
 
         mBinding.rvNotes.getLayoutManager().scrollToPosition(0);
+
         mNoteAdapter.addNote(0, mNewNote);
+
         mNoteList.add(0, mNewNote);
+        Log.i(LOG_TAG, "NEW NOTE IS ADDED TO LIST.");
     }
 
     private void deleteNote() {
 
         if (mNoteList.contains(mOldNote)) {
+
             mNoteAdapter.removeNote(mNoteList.indexOf(mOldNote));
+
             mNoteList.remove(mOldNote);
+            Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM LIST.");
         }
     }
 
@@ -466,48 +472,6 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             mMainActivity.finish();
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private ActionMode              mActionMode;
-
-    private boolean                 areAllItemsSelected;
-    private Menu                    mSelectedMenu;
-
-    private List<Note>              mSelectedNotes;
-    private List<Note>              mTempSelectedNotes;
-
-    private void deleteSelectedNotesFromDatabase() {
-
-        final DeleteSelectedNotesTask deleteSelectedNotesTask = new DeleteSelectedNotesTask(mMainActivity, mSelectedNotes);
-        deleteSelectedNotesTask.setCallback(new DeleteSelectedNotesTask.Callback() {
-            @Override
-            public void onSuccess() {
-
-                Log.i(deleteSelectedNotesTask.LOG_TAG, "SELECTED NOTES ARE DELETED FROM DATABASE.");
-
-                mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
-                mNoteList.removeAll(mSelectedNotes);
-
-                if (isSearchViewOpened)
-                    mFilteredList.removeAll(mSelectedNotes);
-
-                mActionMode.finish();
-
-                deleteSelectedNotesTask.releaseCallback();
-            }
-
-            @Override
-            public void onFailure(Throwable _error) {
-
-                Log.i(deleteSelectedNotesTask.LOG_TAG, "ERROR !!! SELECTED NOTES ARE NOT DELETED FROM DATABASE !!!");
-                Log.e(deleteSelectedNotesTask.LOG_TAG, _error.toString());
-
-                deleteSelectedNotesTask.releaseCallback();
-            }
-        });
-        deleteSelectedNotesTask.execute();
-    }
-
     @Override
     public void onClick(Note _note, int _position) {
 
@@ -540,6 +504,12 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private ActionMode              mActionMode;
+
+    private List<Note>              mSelectedNotes;
+
     private void makeSelection(int _position) {
 
         if (isSearchViewOpened)
@@ -547,16 +517,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
         else
            selectFromList(mNoteList, _position);
 
-        if (mSelectedNotes.size() == mNoteList.size() - 1) {
-
-            mNoteAdapter.makeSelection(_position, false);
-
-        } else {
-
-            mNoteAdapter.makeSelection(_position, true);
-        }
-
-
+        mNoteAdapter.makeSelection(_position);
         final int count = mNoteAdapter.getSelectedItemCount();
 
         if (count == 0) {
@@ -572,31 +533,10 @@ public class ListFragment extends BaseFragment implements INoteHandler {
 
     private void selectFromList(List<Note> _noteList, int _position) {
 
-        if (mSelectedNotes.contains(_noteList.get(_position))) {
-
+        if (mSelectedNotes.contains(_noteList.get(_position)))
             mSelectedNotes.remove(_noteList.get(_position));
-
-            if (areAllItemsSelected)
-                mTempSelectedNotes = new ArrayList<>(mSelectedNotes);
-            else
-                mTempSelectedNotes.remove(_noteList.get(_position));
-
-        } else {
-
+        else
             mSelectedNotes.add(_noteList.get(_position));
-            mTempSelectedNotes.add(_noteList.get(_position));
-        }
-
-        if (_noteList.size() != mSelectedNotes.size()) {
-
-            mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_on_white_24dp));
-            areAllItemsSelected = false;
-
-        } else {
-
-            mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_off_white_24dp));
-            areAllItemsSelected = true;
-        }
     }
 
     private void initActionMode() {
@@ -612,21 +552,23 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 }
 
                 mSelectedNotes = new ArrayList<>();
-                mTempSelectedNotes = new ArrayList<>();
 
                 _mode.getMenuInflater().inflate(R.menu.menu_selected, _menu);
-                mSelectedMenu = _menu;
+
+                Log.i(LOG_TAG, "ACTION MODE IS CREATED.");
 
                 return true;
             }
 
             @Override
             public boolean onPrepareActionMode(ActionMode _mode, Menu _menu) {
+
                 return false;
             }
 
             @Override
             public boolean onActionItemClicked(ActionMode _mode, MenuItem _item) {
+
                 switch (_item.getItemId()) {
                     case R.id.mi_remove:
 
@@ -640,48 +582,28 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                         else
                             mSupport.shareNotes(mMainActivity, mNoteAdapter, mNoteList);
 
+                        Log.i(LOG_TAG, "SELECTED NOTES ARE SHARED.");
+
                         _mode.finish();
 
                         return true;
                     case R.id.mi_select_all:
 
-                        if (!areAllItemsSelected) {
+                        if (isSearchViewOpened) {
 
-                            if (isSearchViewOpened) {
-
-                                mNoteAdapter.selectAllItems(mFilteredList);
-                                mSelectedNotes = new ArrayList<>(mFilteredList);
-
-                            } else {
-
-                                mNoteAdapter.selectAllItems(mNoteList);
-                                mSelectedNotes = new ArrayList<>(mNoteList);
-                            }
-
-                            mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
-                            mActionMode.invalidate();
-
-                            mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_off_white_24dp));
-                            areAllItemsSelected = true;
+                            mNoteAdapter.selectAllItems(mFilteredList);
+                            mSelectedNotes = new ArrayList<>(mFilteredList);
 
                         } else {
 
-                            if (mNoteList.size() == 1 && mTempSelectedNotes.size() == 1) {
-
-                                _mode.finish();
-
-                            } else {
-
-                                mNoteAdapter.deselectAllItems();
-                                mSelectedNotes = new ArrayList<>(mTempSelectedNotes);
-
-                                mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
-                                mActionMode.invalidate();
-
-                                mSelectedMenu.getItem(0).setIcon(mMainActivity.getResources().getDrawable(R.drawable.ic_select_on_white_24dp));
-                                areAllItemsSelected = false;
-                            }
+                            mNoteAdapter.selectAllItems(mNoteList);
+                            mSelectedNotes = new ArrayList<>(mNoteList);
                         }
+
+                        mActionMode.setTitle(String.valueOf(mNoteAdapter.getSelectedItemCount()));
+                        mActionMode.invalidate();
+
+                        Log.i(LOG_TAG, "ALL NOTES ARE SELECTED.");
 
                         return true;
                     default:
@@ -693,9 +615,7 @@ public class ListFragment extends BaseFragment implements INoteHandler {
             public void onDestroyActionMode(ActionMode _mode) {
 
                 mSelectedNotes.clear();
-                mTempSelectedNotes.clear();
                 mNoteAdapter.clearSelection();
-                areAllItemsSelected = false;
                 mActionMode = null;
 
                 if (isSearchViewOpened) {
@@ -708,17 +628,54 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                     mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_88dp));
                     mBinding.floatingActionButton.show();
                 }
+
+                Log.i(LOG_TAG, "ACTION MODE IS DESTROYED.");
             }
         };
 
         mActionMode = mMainActivity.startSupportActionMode(actionModeCallBack);
     }
 
+    private void deleteSelectedNotesFromDatabase() {
+
+        final DeleteSelectedNotesTask deleteSelectedNotesTask = new DeleteSelectedNotesTask(mMainActivity, mSelectedNotes);
+        deleteSelectedNotesTask.setCallback(new DeleteSelectedNotesTask.Callback() {
+            @Override
+            public void onSuccess() {
+
+                Log.i(deleteSelectedNotesTask.LOG_TAG, "SELECTED NOTES ARE DELETED FROM DATABASE.");
+
+                mNoteAdapter.removeNotes(mNoteAdapter.getSelectedItems());
+
+                mNoteList.removeAll(mSelectedNotes);
+                if (isSearchViewOpened)
+                    mFilteredList.removeAll(mSelectedNotes);
+                Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM LIST.");
+
+                mActionMode.finish();
+
+                deleteSelectedNotesTask.releaseCallback();
+            }
+
+            @Override
+            public void onFailure(Throwable _error) {
+
+                Log.i(deleteSelectedNotesTask.LOG_TAG, "ERROR!");
+                Log.e(deleteSelectedNotesTask.LOG_TAG, _error.toString());
+
+                deleteSelectedNotesTask.releaseCallback();
+            }
+        });
+        deleteSelectedNotesTask.execute();
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private boolean         isSearchViewOpened;
-    private List<Note>      mFilteredList;
     private SearchView      mSearchView;
+    private boolean         isSearchViewOpened;
+
+    private List<Note>      mFilteredList;
+
 
     @Override
     public void onCreateOptionsMenu(Menu _menu, MenuInflater _inflater) {
@@ -743,6 +700,8 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                     mSupport.filterList(mNoteList, _query, mFilteredList);
                     mNoteAdapter.animateTo(mFilteredList);
                     mBinding.rvNotes.scrollToPosition(0);
+
+                    Log.i(LOG_TAG, "SEARCH VIEW IS SEARCHING.");
                 }
 
                 return true;
@@ -758,7 +717,9 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 mBinding.floatingActionButton.hide();
                 mBinding.rvNotes.setPadding(0, 0, 0, 0);
 
-                mFilteredList = new ArrayList<>();
+                mFilteredList = new ArrayList<>(mNoteList);
+
+                Log.i(LOG_TAG, "SEARCH VIEW IS OPENED.");
             }
         });
 
@@ -771,7 +732,11 @@ public class ListFragment extends BaseFragment implements INoteHandler {
                 mBinding.rvNotes.setPadding(0, 0, 0, mMainActivity.getResources().getDimensionPixelSize(R.dimen.d_size_88dp));
                 mBinding.floatingActionButton.show();
 
+                mSearchView = null;
+
                 isSearchViewOpened = false;
+
+                Log.i(LOG_TAG, "SEARCH VIEW IS CLOSED.");
 
                 return false;
             }

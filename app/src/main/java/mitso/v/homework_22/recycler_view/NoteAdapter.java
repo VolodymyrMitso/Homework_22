@@ -92,7 +92,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         mNoteList.add(_position, _note);
         notifyItemInserted(_position);
 
-        Log.i(LOG_TAG, "NOTE IS ADDED TO LIST.");
+        Log.i(LOG_TAG, "NEW NOTE IS ADDED TO RECYCLER VIEW.");
     }
 
     public void removeNote(int _position) {
@@ -100,7 +100,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
         mNoteList.remove(_position);
         notifyItemRemoved(_position);
 
-        Log.i(LOG_TAG, "NOTE IS DELETED FROM LIST.");
+        Log.i(LOG_TAG, "OLD NOTE IS DELETED FROM RECYCLER VIEW.");
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ public class NoteAdapter extends SelectableAdapter<NoteViewHolder> {
             }
         }
 
-        Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM LIST.");
+        Log.i(LOG_TAG, "SELECTED NOTES ARE DELETED FROM RECYCLER VIEW.");
     }
 
     private void removeRange(int _positionStart, int _itemCount) {
